@@ -11,7 +11,7 @@ setup(
     license=open('LICENSES.txt').read(),
     packages=find_packages("."),
     python_requires='>=3.8',
-    package_data={'ipdtools': ['resources/']},
+    package_data={'smsn': ['resources/']},
     install_requires=[
         'numpy',
         'joblib',

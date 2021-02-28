@@ -25,6 +25,19 @@ def main():
                             required=True
                         )
 
+    parser.add_argument("--alignment_CSV","-a",
+                        help="smrt_alignment .csv \n"
+                             "[IN THE FINAL PIPELINE, CCS will be recreated and aligned]",
+                        required=True
+                        )
+
+    parser.add_argument("--frequency","-f",
+                            help="Frequency of the sequencer (Hz)",
+                            required=True,
+                            default = 80,
+                            type = check_positive
+                        )
+
     parser.add_argument("--reference","-r",
                             help='Path to a genome reference (fasta file).',
                             required=True,
@@ -46,7 +59,7 @@ def main():
                             action='store_true')
 
     parser.add_argument('--nproc','-n',
-                        help="Max number of processors for parallelism. DEFAULT: 1, positive integers only. Rq: The programm will actually use n+1 >= 2 CPU no matter what.",
+                        help="Max number of processors for parallelism.",
                         required=False,
                         default=1,
                         type=check_positive)
@@ -56,6 +69,8 @@ def main():
     fastafile = os.path.realpath(args.fastafile)
     bamfile = os.path.realpath(args.bam)
     output_csv = os.path.realpath(args.output_csv)
+    alignment_csv = os.path.realpath(args.alignment_csv)
+
 
     verboselevel = "logging."+str(args.verbosity)
     logging.basicConfig(level=eval(verboselevel),

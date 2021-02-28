@@ -1,0 +1,14 @@
+ipdtools --fastafile ./e_coli_O157.fasta --output_csv MODEL_IPD_coli.csv --verbosity DEBUG --nproc 20 --progress_bar --nproc 11
+2021-02-27 20:42:53,356 [INFO] Using 11 CPUs
+2021-02-27 20:42:53,357 [DEBUG] (compute_fasta_to_csv) Creating the manager queue
+2021-02-27 20:42:53,367 [DEBUG] (compute_fasta_to_csv) Launching the writer_process
+2021-02-27 20:42:53,370 [DEBUG] (compute_fasta_to_csv) Waiting for the workers to be done
+2021-02-27 20:42:53,374 [DEBUG] (result_writer) result_writer is ready to write (destination = /home/guillaume/GitHub/MODEL_IPD_coli.csv)
+2021-02-27 20:42:53,374 [INFO] Number of nucleotides to handle : 5604406
+Nucleotides:   0%|                                                                                                                                                                     | 0/5604406 [00:00<?, ?it/s]
+Nucleotides:  23%|█████████████████████████████████▊                                                          
+Nucleotides: 100%|████████████████████████████████████████████████████████████████████████████████████████████
+Nucleotides: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 5604406/5604406 [26:50<00:00, 3400.91it/s]
+2021-02-27 21:10:09,405 [INFO] Result saved at /home/guillaume/GitHub/MODEL_IPD_coli.csv
+
+# total --> 30mn
