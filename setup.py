@@ -4,11 +4,13 @@ from setuptools import setup, Extension, find_packages
 import os
 import sys
 
+## Should be packaged with ipdtools (conda-forge) someday
+
 setup(
     name='smsn',
     version='0.1',
     author='DELEVOYE Guillaume',
-    license=open('LICENSES.txt').read(),
+    license=open('LICENSE.txt').read(),
     packages=find_packages("."),
     python_requires='>=3.8',
     package_data={'smsn': ['resources/']},
