@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, Extension, find_packages
-import os
-import sys
-
-## Should be packaged with ipdtools (conda-forge) someday
+from setuptools import setup, find_packages
 
 setup(
     name='smsn',
@@ -14,15 +10,6 @@ setup(
     packages=find_packages("."),
     python_requires='>=3.8',
     package_data={'smsn': ['resources/']},
-    install_requires=[
-        'numpy',
-        'joblib',
-        'h5py',
-        'pandas',
-        'tqdm',
-        'h5py',
-        'numpy'
-    ],
     entry_points={'console_scripts': [
         "smsn = smsn.launchers.smsn_launcher:main",
     ]},

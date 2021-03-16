@@ -37,7 +37,6 @@ def read_header(bamfilePath):
 
     samtxt = ''
     cmd = 'samtools view -h -S '+str(bamfilePath)
-    bam = None
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                             stdin=subprocess.PIPE)  # We launch samtools view
 
@@ -50,20 +49,21 @@ def read_header(bamfilePath):
 
     return samtxt
 
-def parse_line(line,framerate=80):
+def parse_line(line):
     line = line.split('\t')
 
     returndict = {}
+    returndict["alignment_flag"] = int(line[1])
     returndict["scaffold"] = line[2]
     returndict["start"] = line[3]
-    returndict["CIGAR_string"] = line[5]
+    returndict["CIGAR_string"] = line[5] # A CIGAR object will be created later to avoid saturating the RAM
     returndict["HoleID"] = int(line[0].split('/')[1])
-    returndict["alignment_flag"] = line[1]
     returndict["sequence"] = line[9]
-    returndict["ipd"] = np.array([np.int(x) for x in line[12]])
+
+    returndict["encoded_ipd"] = [x for x in line if x[:3]=="ip:"][0]
+    returndict["encoded_ipd"] = np.array(returndict["encoded_ipd"].split(',')[1:],dtype=np.uint8) # This should then be decoded, but using np.uint8 ensures that not too much place is taken in RAM
 
     return returndict
-
 
 
 def get_pd_dataframe_alignment_custom(bamfile, framerate=80, genome = "None"):
@@ -72,9 +72,10 @@ def get_pd_dataframe_alignment_custom(bamfile, framerate=80, genome = "None"):
     # In each dict, the key is the name of the feature while the value is its... value (Wow !)
     for line in read_bam(os.path.realpath(bamfile)): # Reads the .bam line after line
         if line:
-            alignment_dict = parse_line(line,framerate)
+            alignment_dict = parse_line(line)
             list_alignments.append(alignment_dict.copy())
     return pd.DataFrame(list_alignments) # We return a list of dict transformed in a pandas DataFrame
+
 
 class CIGAR:
 
@@ -286,3 +287,42 @@ def get_samflag(number):
 
     returndict = {x:y for (x,y) in zip(list_significations,flags)}
     return returndict
+
+def parse_header(bamfile):
+    """Returns as a dict the crucial informations that interest us in the header (ID, PL, PU, PM, READTYPE, Ipd:CodecV1, FRAMERATEHZ, etc"""
+
+    logging.info("[INFO] Parsing informations from the .bam input")
+
+    splitted_header = read_header(bamfile).split('\n')
+    lineRG = [x for x in splitted_header if x[0:3] == "@RG"][0]
+    predict = lineRG.split()[1:]
+
+    outputdict = {}
+    for elt in predict:
+        if elt[0:2] != "DS":
+            key = elt.split(':')[0]
+            value = elt.split(':')[1]
+            outputdict[key] = value
+
+    for elt in predict:
+        if elt[0:2] == "DS":
+            DSline = elt[3:]
+
+    for elt in DSline.split(';'):
+        key = elt.split('=')[0]
+        value = elt.split('=')[1]
+        outputdict[key] = value
+
+    if "Ipd:Frames" in outputdict:
+        logging.warning("[WARNING] Your data seems to contain raw frames of inter-pulse durations (IPDs), rather than "
+                        "the usual lossy-encoding (CodecV1). See : "
+                        "https://pacbiofileformats.readthedocs.io/en/3.0/BAM.html. The program will continue anyway, "
+                        "and might work properly. Be carefull, however, when analyzing your data because the pipeline "
+                        "was never tested without CodecV1. If your data was generated from old h5 files, "
+                        "it is possible to re-use bax2bam to encode the IPDs with the CodecV1.")
+
+    outputdict["FRAMERATEHZ"] = float(outputdict["FRAMERATEHZ"])
+    assert outputdict["FRAMERATEHZ"] > 0
+
+
+    return outputdict

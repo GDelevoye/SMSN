@@ -103,3 +103,7 @@ def codeToFrames(code):
 
 def downsampleFrames(nframes):
     return codeToFrames(framesToCode(nframes))
+
+def bamvalue_to_seconds(value,framerate):
+    decoded_value = framesToCode(value)
+    return decoded_value / framerate
