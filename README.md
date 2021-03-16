@@ -10,6 +10,7 @@ user@computer:$ pip install ./SMSN
 
 # Usage
 
+```console
 guillaume@A320MA:~/GitHub$ smsn --help
 usage: smsn [-h] --bam BAM --reference REFERENCE [--model {SP2-C2,C2,P4-C2,P5-C3,P6-C4,XL-C2,XL-XL,auto}] [--frequency FREQUENCY] --output_csv OUTPUT_CSV [--tmpdir TMPDIR]
             [--verbosity {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--progress_bar] [--n_proc N_PROC]
@@ -32,3 +33,4 @@ optional arguments:
   --progress_bar, -p    Displays a progress bar
   --n_proc N_PROC, -n N_PROC
                         Multiprocessing on n CPU. Default: 1. If set to -1, will use all available cores.
+```
