@@ -5,6 +5,7 @@ Version of Beaularier SMSN with in-sillico control
 
 ```console
 conda create -n smsn
+conda activate smsn
 conda install -c bioconda pbcommand
 conda install -c bioconda pbcore
 conda install -c bioconda pbcoretools
