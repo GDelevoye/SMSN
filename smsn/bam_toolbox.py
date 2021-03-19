@@ -3,6 +3,7 @@ import logging
 import subprocess
 import os
 import pandas as pd
+import smsn
 
 def read_bam(bamfilePath):
     """Reads a .bam line by line"""
@@ -13,9 +14,6 @@ def read_bam(bamfilePath):
     logging.debug('[DEBUG] (read_bam) cmd = {}'.format(cmd))
     proc = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE)  # No .sam dropping
-
-    list_txt_sam = ''  # Will contain a .sam string
-    first = True
 
     logging.debug(
         '[DEBUG] (read_bam) Starting to read output from samtools for {}'.format(bamfilePath))
@@ -34,6 +32,7 @@ def read_bam(bamfilePath):
 
 def read_header(bamfilePath):
     """ returns the header as a python-string .sam"""
+    logging.debug("[DEBUG] Reading headers of {}".format(bamfilePath))
 
     samtxt = ''
     cmd = 'samtools view -h -S '+str(bamfilePath)
@@ -49,7 +48,123 @@ def read_header(bamfilePath):
 
     return samtxt
 
-def parse_line(line):
+def get_hole_id(samseq):
+    try:
+        holeID = "".join([x for x in samseq.split('\n') if '@' not in x]).split()[0].split('/')[1]
+    except:
+        holeID = -1
+    return holeID
+
+def sort_by_name(bamfilepath, newpath, nbcore=1):
+    """ Will sort the bam by read name (it will do it numerically for the numbers, not alphabetically, which is convenient for us)"""
+    bampath = os.path.realpath(bamfilepath)
+    bamdir = os.path.dirname(bampath)
+    newpath = os.path.realpath(newpath)
+    HERE = os.getcwd()
+    os.system('mkdir -p '+str(bamdir))
+    os.chdir(bamdir)
+    cmd = 'samtools sort -n ' + \
+        str(os.path.basename(bamfilepath))+' ' + \
+        '-o '+str(newpath)+' -@ '+str(nbcore)
+    os.system(cmd)
+    os.chdir(HERE)
+
+
+def inmemory_asbam(samstring):
+    """ Returns a python byte-encoded .bam from a .sam string. Everything is done in memory, not on hard drive """
+
+    p = subprocess.run('samtools view -bS -h', shell=True,
+                       stdout=subprocess.PIPE, input=samstring.encode('utf-8'))
+    return(p.stdout)
+
+
+def yield_hole_by_hole(subreads_bamfile, header=None, restricted_to = None, min_subreads = 0):
+    """ Yields the subreads HoleID by HoleID as .bam
+    subreads_bamfile must be already sorted by HoleID.
+    "restricted_to" can be the exclusive set of HoleID (int) to include.
+    Can also exclude the holes with a critically low number of subreads
+    """
+    firsthole = next(smsn.bam_toolbox.read_bam(subreads_bamfile))
+    firstHoleID = int(firsthole.split()[0].split('/')[1])
+
+    setelt = set()
+    list_return = []
+
+    setelt.add(firstHoleID)
+
+    for line in read_bam(os.path.realpath(subreads_bamfile)):
+        holeID = int(line.split()[0].split('/')[1]) # Just parse the hole
+        if holeID not in setelt:  # Whenever a new HoleID is encountered, this means that we should yield the previous Hole
+            setelt.add(holeID)
+
+            if not (restricted_to) or (holeID in restricted_to): # Handling if user specified a restriction list
+                if len(list_return) >= min_subreads:
+                    if header:
+                        yield header + "\n".join(list_return)
+                    else:
+                        yield "\n".join(list_return)
+                list_return = []
+                list_return.append(line)
+            else:
+                list_return = []
+
+
+        else: # If the hole is already known, then add this line to the things we'll yield next time
+            list_return.append(line)
+
+    if list_return:  # Don't forget the last line if it is alone:
+        if not(restricted_to) or (holeID in restricted_to):
+            if len(list_return) >= min_subreads:
+                if header:
+                    yield header + "\n".join(list_return)
+                else:
+                    yield "\n".join(list_return)
+        else:
+            pass
+
+    return
+
+def parse_header(bamfile):
+    """Returns as a dict the crucial informations that interest us in the header (ID, PL, PU, PM, READTYPE, Ipd:CodecV1, FRAMERATEHZ, etc"""
+
+    logging.debug("[DEBUG] Parsing informations from the .bam input")
+
+    splitted_header = read_header(bamfile).split('\n')
+    lineRG = [x for x in splitted_header if x[0:3] == "@RG"][0]
+    predict = lineRG.split()[1:]
+
+    outputdict = {}
+    for elt in predict:
+        if elt[0:2] != "DS":
+            key = elt.split(':')[0]
+            value = elt.split(':')[1]
+            outputdict[key] = value
+
+    for elt in predict:
+        if elt[0:2] == "DS":
+            DSline = elt[3:]
+
+    for elt in DSline.split(';'):
+        key = elt.split('=')[0]
+        value = elt.split('=')[1]
+        outputdict[key] = value
+
+    if "Ipd:Frames" in outputdict:
+        logging.warning("[WARNING] Your data seems to contain raw frames of inter-pulse durations (IPDs), rather than "
+                        "the usual lossy-encoding (CodecV1). See : "
+                        "https://pacbiofileformats.readthedocs.io/en/3.0/BAM.html. The program will continue anyway, "
+                        "and might work properly. Be carefull, however, when analyzing your data because the pipeline "
+                        "was never tested without CodecV1. If your data was generated from old h5 files, "
+                        "it is possible to re-use bax2bam to encode the IPDs with the CodecV1.")
+
+    outputdict["FRAMERATEHZ"] = float(outputdict["FRAMERATEHZ"])
+    assert outputdict["FRAMERATEHZ"] > 0
+
+
+    return outputdict
+
+
+def parse_line(line,include_ipds=False):
     line = line.split('\t')
 
     returndict = {}
@@ -59,23 +174,103 @@ def parse_line(line):
     returndict["CIGAR_string"] = line[5] # A CIGAR object will be created later to avoid saturating the RAM
     returndict["HoleID"] = int(line[0].split('/')[1])
     returndict["sequence"] = line[9]
+    returndict["moviename"] = line[0].split('/')[0]
 
-    returndict["encoded_ipd"] = [x for x in line if x[:3]=="ip:"][0]
-    returndict["encoded_ipd"] = np.array(returndict["encoded_ipd"].split(',')[1:],dtype=np.uint8) # This should then be decoded, but using np.uint8 ensures that not too much place is taken in RAM
+    if include_ipds:
+        returndict["encoded_ipd"] = [x for x in line if x[:3]=="ip:"][0]
+        returndict["encoded_ipd"] = np.array(returndict["encoded_ipd"].split(',')[1:],dtype=np.uint8) # This should then be decoded, but using np.uint8 ensures that not too much place is taken in RAM
 
     return returndict
 
 
-def get_pd_dataframe_alignment_custom(bamfile, framerate=80, genome = "None"):
+def detailed_get_pd_dataframe_alignment(bamfile, include_ipds=False):
+    """ From a .bam alignment file, gives a pandas dataframe corresponding to the alignment"""
 
-    list_alignments = [] # We will return a list of dicts
+    list_alignments = []  # We will return a list of dicts
     # In each dict, the key is the name of the feature while the value is its... value (Wow !)
-    for line in read_bam(os.path.realpath(bamfile)): # Reads the .bam line after line
+    for line in read_bam(os.path.realpath(bamfile)):  # Reads the .bam line after line
         if line:
-            alignment_dict = parse_line(line)
-            list_alignments.append(alignment_dict.copy())
-    return pd.DataFrame(list_alignments) # We return a list of dict transformed in a pandas DataFrame
+            line = line.split('\t')
+            moviename = line[0].split('/')[0]
+            scaffold = line[2]
+            start = int(line[3])
+            CIGAR_string = line[5]
+            try:
+                CIGAR_obj = CIGAR(
+                    CIGAR_string)  # CIGAR is a very usefull object I've developped to parse CIGAR strings...
+            # [...] and get many informations about them
+            except Exception as e:
+                logging.error("[ERROR] A problem occured on line : \n{} \n\n\t***** Problem = CIGAR {}".format(line, CIGAR_string))
+                logging.error('[ERROR] Exception recieved = {}'.format(e))
 
+            identity_score = CIGAR_obj.identity
+            end = start + CIGAR_obj.reflen  # Reflen is the size of reference deduced from the CIGAR string
+            # Because the alignment starting position doesn't take the soft-clipping in account,
+            # We don't take it in account either (reflen doesn't take clipped bases in account)
+
+            # But clipped bases are counted as unaligned for %identity computation !
+
+            reflen = end - start
+
+            HoleID = int(line[0].split('/')[1])
+            alignment_flag = int(line[1])
+
+            mapQV = int(line[4])
+            clipped_bases = CIGAR_obj.number_of_clipped
+            matching_bases = CIGAR_obj.number_of_matches
+
+            sequence = line[9]
+
+            list_interest = ["moviename", "scaffold", "start", "CIGAR_string", "identity_score", "end", "HoleID",
+             "alignment_flag", "reflen", "mapQV", "matching_bases", "clipped_bases", "sequence"]
+
+            if include_ipds:
+                encoded_ipds = [x for x in line if x[:3] == "ip:"][0]
+                encoded_ipds = np.array(encoded_ipds.split(',')[1:],
+                                                     dtype=np.uint8)  # This should then be decoded, but using np.uint8 ensures that not too much place is taken in RAM
+                list_interest.append("encoded_ipds")
+
+            alignment_dict = {}
+            for elt in list_interest:
+                # We add all these values to a dict
+                alignment_dict[elt] = eval(elt)
+
+            list_alignments.append(alignment_dict)
+            del line
+    return pd.DataFrame(list_alignments)  # We return a list of dict transformed in a pandas DataFrame
+
+
+def get_samflag(number):
+    """According to https://broadinstitute.github.io/picard/explain-flags.html"""
+
+    list_significations = ["read paired",
+                           "read mapped in proper pair",
+                           "read_unmapped",
+                           "mate_unmapped",
+                           "read reverse strand",
+                           "mate reverse strand",
+                           "first in pair",
+                           "second in pair",
+                           "not primary alignment",
+                           "read failed platform/vendor quality checks",
+                           "read is PCR or optical duplicate",
+                           "supplementary alignment"
+                           ]
+    list_significations = list_significations[::-1]
+    binarized = list(bin(number))[2:]
+
+    while(len(binarized) < len(list_significations)):
+        binarized.insert(0,"0")
+
+    flags = []
+    for i in binarized:
+        if i == "1":
+            flags.append(True)
+        else:
+            flags.append(False)
+
+    returndict = {x:y for (x,y) in zip(list_significations,flags)}
+    return returndict
 
 class CIGAR:
 
@@ -255,74 +450,3 @@ class CIGAR:
 
     def getlen(self):
         return len(self.binarlist)
-
-def get_samflag(number):
-    """According to https://broadinstitute.github.io/picard/explain-flags.html"""
-
-    list_significations = ["read paired",
-                           "read mapped in proper pair",
-                           "read_unmapped",
-                           "mate_unmapped",
-                           "read reverse strand",
-                           "mate reverse strand",
-                           "first in pair",
-                           "second in pair",
-                           "not primary alignment",
-                           "read failed platform/vendor quality checks",
-                           "read is PCR or optical duplicate",
-                           "supplementary alignment"
-                           ]
-    list_significations = list_significations[::-1]
-    binarized = list(bin(number))[2:]
-
-    while(len(binarized) < len(list_significations)):
-        binarized.insert(0,"0")
-
-    flags = []
-    for i in binarized:
-        if i == "1":
-            flags.append(True)
-        else:
-            flags.append(False)
-
-    returndict = {x:y for (x,y) in zip(list_significations,flags)}
-    return returndict
-
-def parse_header(bamfile):
-    """Returns as a dict the crucial informations that interest us in the header (ID, PL, PU, PM, READTYPE, Ipd:CodecV1, FRAMERATEHZ, etc"""
-
-    logging.info("[INFO] Parsing informations from the .bam input")
-
-    splitted_header = read_header(bamfile).split('\n')
-    lineRG = [x for x in splitted_header if x[0:3] == "@RG"][0]
-    predict = lineRG.split()[1:]
-
-    outputdict = {}
-    for elt in predict:
-        if elt[0:2] != "DS":
-            key = elt.split(':')[0]
-            value = elt.split(':')[1]
-            outputdict[key] = value
-
-    for elt in predict:
-        if elt[0:2] == "DS":
-            DSline = elt[3:]
-
-    for elt in DSline.split(';'):
-        key = elt.split('=')[0]
-        value = elt.split('=')[1]
-        outputdict[key] = value
-
-    if "Ipd:Frames" in outputdict:
-        logging.warning("[WARNING] Your data seems to contain raw frames of inter-pulse durations (IPDs), rather than "
-                        "the usual lossy-encoding (CodecV1). See : "
-                        "https://pacbiofileformats.readthedocs.io/en/3.0/BAM.html. The program will continue anyway, "
-                        "and might work properly. Be carefull, however, when analyzing your data because the pipeline "
-                        "was never tested without CodecV1. If your data was generated from old h5 files, "
-                        "it is possible to re-use bax2bam to encode the IPDs with the CodecV1.")
-
-    outputdict["FRAMERATEHZ"] = float(outputdict["FRAMERATEHZ"])
-    assert outputdict["FRAMERATEHZ"] > 0
-
-
-    return outputdict

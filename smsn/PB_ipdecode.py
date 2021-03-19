@@ -105,5 +105,9 @@ def downsampleFrames(nframes):
     return codeToFrames(framesToCode(nframes))
 
 def bamvalue_to_seconds(value,framerate):
+    """"Value" here is the raw value of IPD that appears from a samtools view output. This function will decode to how
+    many frames it corresponds, and then deduce the measurement of IPD. This function should be used to decode data
+    encoded with the CodecV1 version; not when the raw frames are present in the bam ("Production mode"). See
+    https://pacbiofileformats.readthedocs.io/en/3.0/BAM.html for more details"""
     decoded_value = framesToCode(value)
     return decoded_value / framerate
