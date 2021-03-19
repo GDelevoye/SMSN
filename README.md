@@ -4,7 +4,7 @@ Version of Beaularier SMSN with in-sillico control
 # Installation 
 
 ```console
-conda create -n smsn python=3.4
+conda create -n smsn python=3.5
 conda activate smsn
 conda install -c bioconda pbbam
 conda install -c bioconda blasr
@@ -12,7 +12,7 @@ conda install -c bioconda samtools
 conda install -c bioconda pbccs
 conda install -c bioconda pybigwig
 git clone https://github.com/GDelevoye/kineticsTools.git
-pip install ./kienticsTools/
+pip install ./kineticsTools/
 git clone https://github.com/GDelevoye/SMSN.git
 pip install ./SMSN/
 ```
