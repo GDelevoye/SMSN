@@ -9,7 +9,7 @@ conda activate smsn
 conda install -c bioconda pbbam
 conda install -c bioconda blasr
 conda install -c bioconda pbccs
-conda install pybigwig
+conda install -c bioconda pybigwig
 git clone https://github.com/GDelevoye/kineticsTools.git
 pip install ./kienticsTools/
 git clone https://github.com/GDelevoye/SMSN.git
