@@ -8,7 +8,7 @@ conda install -c bioconda pbcore
 conda install -c bioconda pbcoretools
 
 ```console
-conda create -n smsn python=3.9
+conda create -n smsn python=3.7
 conda activate smsn
 conda install -c bioconda pbcommand
 conda install -c bioconda pbbam
