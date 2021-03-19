@@ -14,8 +14,7 @@ conda install -c bioconda pbcoretools
 conda install -c bioconda pbcommand
 conda install -c bioconda pbbam
 conda install -c bioconda blasr
-conda install -c bioconda samtools
-conda install -c bioconda pbccs
+conda install -c bioconda samtools=1.9 --force-reinstallconda install -c bioconda pbccs
 conda install -c bioconda pybigwig
 conda install psutil
 conda install pandas
