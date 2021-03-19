@@ -17,6 +17,9 @@ conda install -c bioconda blasr
 conda install -c bioconda samtools
 conda install -c bioconda pbccs
 conda install -c bioconda pybigwig
+conda install psutil
+conda install pandas
+pip install pandarallel
 git clone https://github.com/GDelevoye/kineticsTools.git
 pip install ./kineticsTools/
 git clone https://github.com/GDelevoye/SMSN.git
