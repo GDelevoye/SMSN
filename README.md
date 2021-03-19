@@ -8,6 +8,7 @@ conda create -n smsn python=3.4
 conda activate smsn
 conda install -c bioconda pbbam
 conda install -c bioconda blasr
+conda install -c bioconda samtools
 conda install -c bioconda pbccs
 conda install -c bioconda pybigwig
 git clone https://github.com/GDelevoye/kineticsTools.git
