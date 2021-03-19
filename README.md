@@ -3,9 +3,14 @@ Version of Beaularier SMSN with in-sillico control
 
 # Installation 
 
+Pas sûr de l'utilité (pas réussi à les trouver dispo et compatible):
+conda install -c bioconda pbcore
+conda install -c bioconda pbcoretools
+
 ```console
 conda create -n smsn python=3.9
 conda activate smsn
+conda install -c bioconda pbcommand
 conda install -c bioconda pbbam
 conda install -c bioconda blasr
 conda install -c bioconda samtools
