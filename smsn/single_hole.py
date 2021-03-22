@@ -14,6 +14,7 @@ from smsn.bam_toolbox import inmemory_asbam, get_hole_id
 import pandas as pd
 from smsn.kineticsHack import get_ipdSummary_details
 import copy
+import shutil
 
 def compute_chunk_infos(real_start, real_end, fasta_this_scaffold):
     """Creates a chunk to build a false ref at +100 / -100 of the begin/end where the CCS mapped"""
@@ -33,18 +34,16 @@ def compute_chunk_infos(real_start, real_end, fasta_this_scaffold):
     return (chunk_start, chunk_end, chunk_size, offset, sequence)
 
 
-def analyze_singleHole(samseq,scaffold,real_start,real_end,args):
+def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     fastafile = args["reference"]
     workdir = args["tmpdir"]
-
 
     fasta = load_fasta_special(os.path.realpath(fastafile))
     HERE = os.getcwd()
     os.chdir(workdir)
 
-    holeID = get_hole_id(samseq)
-    holeNumber = holeID
+    holeNumber = holeID # Just another alias to make copy-paste safe between codes # FIXME
 
     os.system('mkdir -p '+str(holeID))
     os.chdir(str(holeID))
@@ -75,7 +74,10 @@ def analyze_singleHole(samseq,scaffold,real_start,real_end,args):
 
     # Perform the analysis itself
     # We don't switch the mode of ipdSummary with the hack for it has already been made before in the 'true_smrt' function
-    results = get_ipdSummary_details('./'+str(holeNumber)+'.bam', './chunked_ref.fasta', workdir = None, threshold_coverage = 25, single_hole = str(holeNumber), nbcore = 1, chunk_size = chunk_size)
+    results = get_ipdSummary_details('./'+str(holeNumber)+'.bam',
+                                     './chunked_ref.fasta',
+                                     holeID = holeID,
+                                     args = args)
 
     results = pd.DataFrame(results)
     try:
@@ -90,9 +92,11 @@ def analyze_singleHole(samseq,scaffold,real_start,real_end,args):
 
     path_thishole_tmpdir = os.path.join(args["tmpdir"],str(holeID))
     logging.debug('[DEBUG] Deleting {}'.format(path_thishole_tmpdir))
-    os.rmdir(path_thishole_tmpdir)
+    shutil.rmtree(path_thishole_tmpdir,ignore_errors=True)
 
-    return results
+    print(results)
+    print(type(results))
+    return results.copy()
 
 
 

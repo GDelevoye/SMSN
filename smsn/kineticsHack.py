@@ -40,7 +40,7 @@ def parse_hacked_output(line):
         except IndexError:
             logging.warning('[WARNING] (parse_hacked_output) The line contained type_capping but wasn\'t splitable: {}'.format(line))
         try:
-            current_dict[str(key)] = (int(value)) # Try to get it as a python integer
+            current_dict[str(key)] = int(value)# Try to get it as a python integer
         except:
             try:
                 current_dict[str(key)] = float(value) # else a float...
@@ -55,13 +55,10 @@ def parse_hacked_output(line):
 
     return current_dict
 
-def get_ipdSummary_details(aligned_subreads, reference, workdir = None, threshold_coverage = 25, single_hole = None, nbcore = 1, chunk_size = None):
+def get_ipdSummary_details(aligned_subreads, reference, holeID, args):
     """Returns a list of dicts corresponding to the hacked output of ipdSummary"""
 
     HERE = os.getcwd()
-    if workdir:
-        workdir = os.path.realpath(workdir)
-        os.chdir(workdir)
     alignmentFile = os.path.realpath(aligned_subreads)
     reference = os.path.realpath(reference)
 
@@ -69,23 +66,10 @@ def get_ipdSummary_details(aligned_subreads, reference, workdir = None, threshol
     os.system('pbindex '+str(os.path.realpath(alignmentFile)))
 
     list_output = [] # A list of dict (one dict = one nucleotide on 1 strand)
-    if single_hole:
-        logging.debug('[DEBUG] (get_ipdSummary_details) Working on a single mode approach for hole {}'.format(str(single_hole)))
-        if workdir:
-            os.chdir(workdir)
-        else:
-            workdir = '.'
-        if chunk_size:
-            cmd = 'ipdSummary '+str(os.path.realpath(workdir))+'/aligned_on_restrictedscaffold_'+str(single_hole)+'.bam '+'--reference '+reference+' --methylFraction --identify m4C,m6A,m5C --gff '+str(single_hole)+'.gff'+' --referenceStride '+str(chunk_size)
-        else:
-            cmd = 'ipdSummary '+str(os.path.realpath(workdir))+'/aligned_on_restrictedscaffold_'+str(single_hole)+'.bam '+'--reference '+reference+' --methylFraction --identify m4C,m6A,m5C --gff '+str(single_hole)+'.gff'
+    logging.debug('[DEBUG] (get_ipdSummary_details) Working on a single mode approach for hole {}'.format(str(holeID)))
 
-    else:
-        if chunk_size:
-            cmd = "ipdSummary "+str(os.path.realpath(alignmentFile))+" --reference "+str(os.path.realpath(reference))+" --methylFraction --identify m4C,m6A,m5C --outfile TEST --numWorkers "+str(int(nbcore))+" --referenceStride "+str(chunk_size)
-        else:
-            cmd = 'ipdSummary '+str(os.path.realpath(workdir))+'/aligned_on_restrictedscaffold_'+str(single_hole)+'.bam '+'--reference '+reference+' --methylFraction --identify m4C,m6A,m5C --gff '+str(single_hole)+'.gff'
-
+    workdir = os.path.dirname(aligned_subreads)
+    cmd = 'ipdSummary '+os.path.join(workdir,'aligned_on_restrictedscaffold_'+str(holeID)+'.bam')+' --reference '+reference+' --methylFraction --identify m4C,m6A,m5C --gff '+str(holeID)+'.gff'
 
     logging.debug('[DEBUG] (simple_ipdSummary_stats) Launching the following cmd: {}'.format(cmd))
     logging.info('[INFO] Launching ipdSummary (methylation analysis) --> {}'.format(cmd))

@@ -88,23 +88,21 @@ def launch_smsn(args):
                                                  header=args["bam_header"],
                                                  restricted_to=set_holes_to_analyse,
                                                  min_subreads=args["min_subreads"])
-
-    df = pd.DataFrame()
+    logging.debug("[DEBUG] Reader initialized")
+    proto_df = []
     i = 0
     chunknb = 0
     for samtxt in reader:
             newdict = {}
-            newdict["sam"] = args["bam_header"] + samtxt,
+            newdict["sam"] = args["bam_header"] + samtxt
             newdict["HoleID"] = int(smsn.bam_toolbox.get_hole_id(samtxt))
-
             alignment_this_hole = df_aligned_CCS.loc[newdict["HoleID"]]
-
             newdict["scaffold"] = alignment_this_hole["scaffold"]
             newdict["start"] = alignment_this_hole["start"]
             newdict["end"] = alignment_this_hole["end"]
 
-            df.append(newdict,ignore_index=True)
-
+            logging.debug('[DEBUG] New hole added to analysis --> {}, {}, {}, {}'.format(newdict["HoleID"],newdict["scaffold"],newdict['start'],newdict['end']))
+            proto_df.append(newdict.copy())
 
             i+=1
 
@@ -112,8 +110,9 @@ def launch_smsn(args):
                 logging.info('[INFO] Analyzing chunk n° {} of size {}'.format(chunknb,i))
 
                 ### Indicate the mapping positions:
-
-                outputs = df.parallel_apply(lambda x: smsn.single_hole.analyze_singleHole(x["sam"],
+                df = pd.DataFrame(proto_df)
+                outputs = df.parallel_apply(lambda x: smsn.single_hole.analyze_singleHole(x["HoleID"],
+                                                                         x["sam"],
                                                                          x["scaffold"],
                                                                          x["start"],
                                                                          x["end"],
@@ -121,7 +120,7 @@ def launch_smsn(args):
 
                 chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
                 logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
-                outputs = pd.concat(outputs,ignore_index=True)
+                outputs = pd.concat([x for x in outputs],ignore_index=True)
                 outputs.to_csv(chunk_csvpath,sep=";")
 
                 chunknb += 1
@@ -131,20 +130,22 @@ def launch_smsn(args):
                 del outputs
                 gc.collect()
 
-                df = pd.DataFrame()
-
 
     # Handling the last chunk (happens if its size is < sizechunks)
-    if len(df)>0:
+    if len(proto_df)>0:
         logging.info('[INFO] Analyzing last chunk - n° {} of size {}'.format(chunknb,i))
-        outputs = df.parallel_apply(lambda x: analyze_singleHole(x["sam"],
+
+        df = pd.DataFrame(proto_df)
+        outputs = df.parallel_apply(lambda x: smsn.single_hole.analyze_singleHole(x["HoleID"],
+                                                                 x["sam"],
                                                                  x["scaffold"],
                                                                  x["start"],
                                                                  x["end"],
                                                                  args),
                                     axis=1)  # Simple trick to make it parallel
-        outputs = pd.concat(outputs, ignore_index=True)
+        outputs = pd.concat([x for x in outputs], ignore_index=True)
         chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
+        logging.debug("[DEBUG] chunk_csvpath = {}".format(chunk_csvpath))
         logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
         outputs.to_csv(chunk_csvpath,sep=";")
 
@@ -152,13 +153,20 @@ def launch_smsn(args):
     logging.info("[INFO] Compiling all results of all chunks into a single file")
 
     try:
-        compilation = [pd.read_csv(x,sep=";") for x in os.listdir(args["tmpdir"]) if "tmp_analysis_chunk" in x]
-        compilation.to_csv(args["output_csv"],sep=";")
+        compilation = []
+        for elt in os.listdir(args["tmpdir"]):
+            if "tmp_analysis_chunk" in elt:
+                tmp_path = os.path.join(args["tmpdir"],elt)
+                compilation.append(pd.read_csv(tmp_path,sep=";"))
+
+
+        pd.concat(compilation,ignore_index=True).to_csv(args["output_csv"],sep=";")
         logging.info('[INFO] Result saved at {}'.format(args["output_csv"]))
         failed = False
 
     except Exception as e:
         logging.error('[ERROR] Compilation of all the output csv files failed with the following error: \n{}'.format(e))
+        logging.error("[ERROR] Problem with compiling into {}".format(args["output_csv"]))
         failed = True
 
     if not failed:
@@ -207,7 +215,7 @@ def recreate_CCS(subread_file, nbproc,tmpdir):
     output_report = filin.read()
     filin.close()
 
-    logging.debug("[DEBUG] Report generated = {}".format(output_report))
+    logging.info("[INFO] Report generated = {}".format(output_report))
 
     logging.debug("[DEBUG] Renaming the report")
 

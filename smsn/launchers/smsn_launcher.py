@@ -17,36 +17,36 @@ import sys
 import logging
 import psutil
 
-def handle_chemistry_and_compatibility(modeluser,bamfile):
-    """Returns the chemistry to use. Logs errors and warnings if potential compatibility problems are detected, or if we
-    can give some advices."""
-    logging.debug("[DEBUG] Handling the ipdmodel of user compared to the type of its data")
-
-    picked = ""
-
-    logging.warning("[WARNING] SMSN is not available to parse all the subtle differences between the Sequel Versions. "
-                    "Before you analyse your data in details, please make sure that you've read and understood "
-                    "https://github.com/GDelevoye/ipdtools#-which-model-should-i-use-")
-
-    parsed_header = smsn.bam_toolbox.parse_header(bamfile)
-    if modeluser != "auto":
-        logging.warning("[WARNING] The model is not selected automatically, which is deprecated outside of very "
-                        "precise studies.")
-        picked = modeluser
-    elif modeluser == "auto":
-        if parsed_header["PM"] == "SEQUEL":
-            logging.info("[INFO] Sequel data detected. Model SP2-C2 will be used.")
-            picked = "SP2-C2"
-        elif parsed_header["PM"] == "RS":
-            logging.info("[INFO] RS data detected. Model P5-C3 will be used.")
-            picked = "P5-C3"
-        else:
-            logging.error("[ERROR] Platform unknown : {} (never tested). SP2-C2 (Sequel I/II.2) will be used as "
-                          "default. Results could be totally wrong.".format(parsed_header["PM"]))
-            picked = "SP2-C2"
-            logging.info("[INFO] Trying to use SP2-C2")
-
-    return picked
+# def handle_chemistry_and_compatibility(modeluser,bamfile):
+#     """Returns the chemistry to use. Logs errors and warnings if potential compatibility problems are detected, or if we
+#     can give some advices."""
+#     logging.debug("[DEBUG] Handling the ipdmodel of user compared to the type of its data")
+#
+#     picked = ""
+#
+#     logging.warning("[WARNING] SMSN is not available to parse all the subtle differences between the Sequel Versions. "
+#                     "Before you analyse your data in details, please make sure that you've read and understood "
+#                     "https://github.com/GDelevoye/ipdtools#-which-model-should-i-use-")
+#
+#     parsed_header = smsn.bam_toolbox.parse_header(bamfile)
+#     if modeluser != "auto":
+#         logging.warning("[WARNING] The model is not selected automatically, which is deprecated outside of very "
+#                         "precise studies.")
+#         picked = modeluser
+#     elif modeluser == "auto":
+#         if parsed_header["PM"] == "SEQUEL":
+#             logging.info("[INFO] Sequel data detected. Model SP2-C2 will be used.")
+#             picked = "SP2-C2"
+#         elif parsed_header["PM"] == "RS":
+#             logging.info("[INFO] RS data detected. Model P5-C3 will be used.")
+#             picked = "P5-C3"
+#         else:
+#             logging.error("[ERROR] Platform unknown : {} (never tested). SP2-C2 (Sequel I/II.2) will be used as "
+#                           "default. Results could be totally wrong.".format(parsed_header["PM"]))
+#             picked = "SP2-C2"
+#             logging.info("[INFO] Trying to use SP2-C2")
+#
+#     return picked
 
 def main():
     """Parses the user's arguments, makes all the required checkings and warnings (if needed), and then launches the
@@ -77,13 +77,13 @@ def main():
                             required=True,
                             default=None)
 
-    parser.add_argument("--model","-m",
-                            help='Choose the model for IPD prediction. See '
-                                 'https://github.com/GDelevoye/ipdtools#-which-model-should-i-use- for more info. '
-                                 'DEFAULT: Automatic guess according to the input .bam',
-                            required=False,
-                            choices=["SP2-C2","C2","P4-C2","P5-C3","P6-C4","XL-C2","XL-XL","auto"],
-                            default="auto")
+    # parser.add_argument("--model","-m",
+    #                         help='Choose the model for IPD prediction. See '
+    #                              'https://github.com/GDelevoye/ipdtools#-which-model-should-i-use- for more info. '
+    #                              'DEFAULT: Automatic guess according to the input .bam',
+    #                         required=False,
+    #                         choices=["SP2-C2","C2","P4-C2","P5-C3","P6-C4","XL-C2","XL-XL","auto"],
+    #                         default="auto")
 
     # parser.add_argument("--frequency","-f",
     #                         help="[NOT MANDATORY] Frequency of the sequencer (Hz). Default = AUTO. In the tested "
@@ -218,7 +218,7 @@ def main():
 
     ########## HANDLING CHEMISTRY
 
-    handle_chemistry_and_compatibility(args.model, bamfile)
+    # args.model = handle_chemistry_and_compatibility(args.model, bamfile)
 
     ########## HANDLING tmp_dir
 

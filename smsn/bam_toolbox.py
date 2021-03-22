@@ -100,9 +100,9 @@ def yield_hole_by_hole(subreads_bamfile, header=None, restricted_to = None, min_
             if not (restricted_to) or (holeID in restricted_to): # Handling if user specified a restriction list
                 if len(list_return) >= min_subreads:
                     if header:
-                        yield header + "\n".join(list_return)
+                        yield header + "\n".join([x.strip() for x in list_return])+"\n"
                     else:
-                        yield "\n".join(list_return)
+                        yield "\n".join([x.strip() for x in list_return])+"\n"
                 list_return = []
                 list_return.append(line)
             else:
@@ -116,9 +116,9 @@ def yield_hole_by_hole(subreads_bamfile, header=None, restricted_to = None, min_
         if not(restricted_to) or (holeID in restricted_to):
             if len(list_return) >= min_subreads:
                 if header:
-                    yield header + "\n".join(list_return)
+                    yield header + "\n".join([x.strip() for x in list_return])+"\n"
                 else:
-                    yield "\n".join(list_return)
+                    yield "\n".join([x.strip() for x in list_return])+"\n"
         else:
             pass
 
