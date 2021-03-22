@@ -239,6 +239,16 @@ def detailed_get_pd_dataframe_alignment(bamfile, include_ipds=False):
             del line
     return pd.DataFrame(list_alignments)  # We return a list of dict transformed in a pandas DataFrame
 
+def listholes(bamfilePath):
+    """Returns the set of all the HoleID contained in the bamfile"""
+
+    bamfilePath = os.path.realpath(bamfilePath)
+    logging.debug('[DEBUG] Listing holes present in bamfile {}'.format(bamfilePath))
+    setHoles = set()
+    for line in read_bam(bamfilePath):
+        holeID = int(line.split()[0].split-('/')[1])
+        setHoles.add(holeID)
+    return setHoles
 
 def get_samflag(number):
     """According to https://broadinstitute.github.io/picard/explain-flags.html"""

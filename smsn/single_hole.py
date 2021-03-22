@@ -15,6 +15,7 @@ import pandas as pd
 from smsn.kineticsHack import get_ipdSummary_details
 import copy
 import shutil
+import subprocess
 
 def compute_chunk_infos(real_start, real_end, fasta_this_scaffold):
     """Creates a chunk to build a false ref at +100 / -100 of the begin/end where the CCS mapped"""
@@ -65,12 +66,54 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     aligned_on_restrictedscaffold = os.getcwd()+'/'+'aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
     logging.debug('Executing {}'.format(cmd))
-    os.system(cmd)
+    ###############
+    processname = cmd.split()[0]
+    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
+    called_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    error_output = called_process.stderr.read().decode('utf-8')
+    if error_output:
+        logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,
+                                                                        called_process.stderr.read().decode('utf-8')))
+    # This will show you eventual errors + will force the kernel to wait the end of the process
+
+    logging.debug(
+        "[DEBUG] stdout output of program {} : {}".format(processname, called_process.stdout.read().decode('utf-8')))
+    ###############
 
     # Indexing the mapped .bam
     logging.debug('[DEBUG] (worker_perform_analysis_one_hole) Generating index for the aligned file')
-    os.system('pbindex aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam')
-    os.system('samtools faidx ./chunked_ref.fasta')
+    cmd = 'pbindex aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
+    ###############
+    processname = cmd.split()[0]
+    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
+    called_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    error_output = called_process.stderr.read().decode('utf-8')
+    if error_output:
+        logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,
+                                                                        called_process.stderr.read().decode('utf-8')))
+    # This will show you eventual errors + will force the kernel to wait the end of the process
+
+    logging.debug(
+        "[DEBUG] stdout output of program {} : {}".format(processname, called_process.stdout.read().decode('utf-8')))
+    ###############
+
+    cmd ='samtools faidx ./chunked_ref.fasta'
+    ###############
+    processname = cmd.split()[0]
+    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
+    called_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    error_output = called_process.stderr.read().decode('utf-8')
+    if error_output:
+        logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,
+                                                                        called_process.stderr.read().decode('utf-8')))
+    # This will show you eventual errors + will force the kernel to wait the end of the process
+
+    logging.debug(
+        "[DEBUG] stdout output of program {} : {}".format(processname, called_process.stdout.read().decode('utf-8')))
+    ###############
 
     # Perform the analysis itself
     # We don't switch the mode of ipdSummary with the hack for it has already been made before in the 'true_smrt' function
@@ -94,8 +137,6 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     logging.debug('[DEBUG] Deleting {}'.format(path_thishole_tmpdir))
     shutil.rmtree(path_thishole_tmpdir,ignore_errors=True)
 
-    print(results)
-    print(type(results))
     return results.copy()
 
 

@@ -143,10 +143,10 @@ def launch_smsn(args):
                                                                  x["end"],
                                                                  args),
                                     axis=1)  # Simple trick to make it parallel
-        outputs = pd.concat([x for x in outputs], ignore_index=True)
         chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
+        outputs = pd.concat([x for x in outputs], ignore_index=True)
         logging.debug("[DEBUG] chunk_csvpath = {}".format(chunk_csvpath))
-        logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
+        logging.debug('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
         outputs.to_csv(chunk_csvpath,sep=";")
 
     ####################################################################################################################
@@ -199,7 +199,7 @@ def recreate_CCS(subread_file, nbproc,tmpdir):
     outputbam = os.path.join(os.path.realpath(tmpdir), moviename + ".CCS.bam")
 
     # Here I use very laxist parameters so that I'm sure that almost every hole is going to give a consensus
-    cmd = "ccs --minLength 50 --maxLength 50000  --minPasses 0 --minPredictedAccuracy 0.5 --numThreads " + str(
+    cmd = "ccs --minLength 50 --maxLength 50000 --minPasses 0 --minPredictedAccuracy 0.5 --numThreads " + str(
         nbproc) + " " + subread_file + " " + outputbam
     logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
     ccs_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -243,6 +243,6 @@ def align_CCS(CCS,reference,aligned_CCS,notaligned_CCS,tmpdir,nb_proc):
     if stdout:
         logging.debug("[DEBUG] BLASR stdout = " + stdout )
     if stderr:
-        logging.debug("[ERROR] BLASR stderr = " + stderr)
+        logging.debug("[DEBUG] BLASR stderr = " + stderr)
 
     logging.debug('[DEBUG] Mapping DONE for {} on {}. Output canbe found at {}'.format(CCS,reference,aligned_CCS))

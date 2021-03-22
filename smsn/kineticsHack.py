@@ -63,16 +63,31 @@ def get_ipdSummary_details(aligned_subreads, reference, holeID, args):
     reference = os.path.realpath(reference)
 
     logging.debug('[DEBUG] (get_ipdSummary_details) Pbindexing the bam in order to analyze it with ipdSummary')
-    os.system('pbindex '+str(os.path.realpath(alignmentFile)))
+
+##############
+    cmd = 'pbindex '+str(os.path.realpath(alignmentFile))
+    processname = cmd.split()[0]
+    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
+    called_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    error_output = called_process.stderr.read().decode('utf-8')
+    if error_output:
+        logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,
+                                                                        called_process.stderr.read().decode('utf-8')))
+    # This will show you eventual errors + will force the kernel to wait the end of the process
+
+    logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,called_process.stdout.read().decode('utf-8')))
+###############
 
     list_output = [] # A list of dict (one dict = one nucleotide on 1 strand)
     logging.debug('[DEBUG] (get_ipdSummary_details) Working on a single mode approach for hole {}'.format(str(holeID)))
 
     workdir = os.path.dirname(aligned_subreads)
+
     cmd = 'ipdSummary '+os.path.join(workdir,'aligned_on_restrictedscaffold_'+str(holeID)+'.bam')+' --reference '+reference+' --methylFraction --identify m4C,m6A,m5C --gff '+str(holeID)+'.gff'
 
     logging.debug('[DEBUG] (simple_ipdSummary_stats) Launching the following cmd: {}'.format(cmd))
-    logging.info('[INFO] Launching ipdSummary (methylation analysis) --> {}'.format(cmd))
+    logging.debug('[DEBUG] Launching ipdSummary (methylation analysis) --> {}'.format(cmd))
     proc = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = sys.stderr)
 
     for line in proc.stdout:
