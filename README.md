@@ -3,17 +3,25 @@ Version of Beaularier SMSN with in-sillico control
 
 # Installation 
 
+En python 3.7 on peut trouver tout le nécessaire sur anaconda/bioconda
+Dans les autres versions de python, non
+
 ```console
-conda create -n smsn
+conda create -n smsn python=3.7
 conda activate smsn
-conda install -c bioconda pbcommand
 conda install -c bioconda pbcore
 conda install -c bioconda pbcoretools
-conda install -c bioconda blasr
-conda install -c bioconda pbccs
+conda install -c bioconda pbcommand
 conda install -c bioconda pbbam
+conda install -c bioconda blasr
+conda install -c bioconda samtools=1.9 --force-reinstall
+conda install -c bioconda pbccs=3.1 --force-reinstall
+conda install -c bioconda pybigwig
+conda install psutil
+conda install pandas
+pip install pandarallel
 git clone https://github.com/GDelevoye/kineticsTools.git
-pip install ./kienticsTools/
+pip install ./kineticsTools/
 git clone https://github.com/GDelevoye/SMSN.git
 pip install ./SMSN/
 ```
