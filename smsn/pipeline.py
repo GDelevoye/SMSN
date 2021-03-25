@@ -27,7 +27,10 @@ def call_process(cmd):
 
     error_output = process.stderr.read().decode('utf-8')
     if error_output.strip():
-        logging.error("[ERROR] (stderr output of process {}) : {}".format(processname,error_output))
+        if "INFO" in error_output: # In order to not be spammed by CCS which has a bugged output
+            logging.debug('[DEBUG] (stderr of process {} : {}'.format(processname,error_output))
+        else:
+            logging.error("[ERROR] (stderr output of process {}) : {}".format(processname,error_output))
     # This will show you eventual errors + will force the kernel to wait the end of the process
 
 def launch_smsn(args):
@@ -148,6 +151,8 @@ def launch_smsn(args):
                 del df
                 del outputs
                 gc.collect()
+
+                proto_df = []
 
 
     # Handling the last chunk (happens if its size is < sizechunks)
