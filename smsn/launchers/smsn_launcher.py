@@ -97,18 +97,32 @@ def main():
                             required=True)
 
     parser.add_argument('--min_identity',"-i",
-                            help='minimum identity (percentage) of the CCS required to launch analysis on a hole.',
+                            help='minimum identity (percentage) of the CCS required to launch analysis on a hole. '
+                                 '[DEFAULT: 0.99]',
                             required=False,
                             default=0.99,
                             type=float)
 
 
     parser.add_argument('--min_subreads',"-s",
-                            help='Minimum number of subreads required to launch analysis on the hole. DEFAULT = 50 ('
+                            help='Minimum number of subreads required to launch analysis on the hole. [DEFAULT = 50] ('
                                  'so that its possible to have >=25X per strand on at least one position) ',
                             required=False,
                             default=50,
                             type=check_positive)
+
+    parser.add_argument("--HT_condor", "-H",
+                        help='DEPRECATED: Launches the program through a condor_submit process. CAUTION: This will '
+                             'over-ride other parameters, or change their meaning. --CCS must be specified, '
+                             'and must already correspond to the CCS alignments against the reference with BLASR.'
+                             ' This will launch -n HT_condor instances, each of them '
+                             'being in charge of -k holes. Recommanded values are n < 200 and k ~ 10 or 20. Each of the '
+                             '-n instances will run on only 1 core for all its operations. tmp_dir will not be cleared'
+                             'after operations, and concatenating the tmp_chunk csv files will not be done either.'
+                             '[DEFAULT : False]',
+                        required=False,
+                        default=False,
+                        action="store_true")
 
 
     parser.add_argument('--tmpdir','-t',
@@ -258,36 +272,42 @@ def main():
 
     ###### Handling processor informations
 
-    try:
-        nb_available = psutil.cpu_count(logical=True)
-        logging.info("[INFO] Available cores: {}".format(nb_available))
-    except:
-        nb_available = 1
-        logging.error("[ERROR] Failed to seek the available number of CPU cores with psutils. Max is set to 1")
+    if not args.HT_condor:
+        try:
+            nb_available = psutil.cpu_count(logical=True)
+            logging.info("[INFO] Available cores: {}".format(nb_available))
+        except:
+            nb_available = 1
+            logging.error("[ERROR] Failed to seek the available number of CPU cores with psutils. Max is set to 1")
 
-    if int(args.nb_proc) == -1:
-        args.nb_proc = nb_available
-        logging.info("[INFO] Using all known cores: {} CPU cores.".format(args.nb_proc))
+        if int(args.nb_proc) == -1:
+            args.nb_proc = nb_available
+            logging.info("[INFO] Using all known cores: {} CPU cores.".format(args.nb_proc))
 
-    elif int(args.nb_proc) < 1:
-        logging.warning("[WARNING] Number of CPU cores cannot be set to null or negative values. Will be set to 1")
-        args.nb_proc = 1
+        elif int(args.nb_proc) < 1:
+            logging.warning("[WARNING] Number of CPU cores cannot be set to null or negative values. Will be set to 1")
+            args.nb_proc = 1
 
-    elif args.nb_proc > nb_available:
-        logging.warning("[WARNING] You asked for {} CPU cores but only {} are available. n_proc is set to {}".format(args.nb_proc,nb_available,nb_available))
-        args.nb_proc = nb_available
+        elif args.nb_proc > nb_available:
+            logging.warning("[WARNING] You asked for {} CPU cores but only {} are available. n_proc is set to {}".format(args.nb_proc,nb_available,nb_available))
+            args.nb_proc = nb_available
 
-    else: # If there is no problem
-        logging.info("[INFO] Use CPU cores: {}".format(args.nb_proc))
+        else: # If there is no problem
+            logging.info("[INFO] Use CPU cores: {}".format(args.nb_proc))
 
-    logging.debug("[DEBUG] Launching the analysis with the following arguments: {}".format(args))
+        logging.debug("[DEBUG] Launching the analysis with the following arguments: {}".format(args))
 
-    if args.sizechunks < args.nb_proc:
-        logging.warning("[WARNING] sizechunk being < to nb_proc, we'll switch to sizechunk = np_proc x 20 by default")
-        args.sizechunks = (args.nb_proc) * 20
+        if args.sizechunks < args.nb_proc:
+            logging.warning("[WARNING] sizechunk being < to nb_proc, we'll switch to sizechunk = np_proc x 20 by default")
+            args.sizechunks = (args.nb_proc) * 20
+    else:
+        logging.warning('[WARNIGN] Using HT_condor. CPU requirements are ignored')
 
     # And finally when everything is set up correctly, we just have to do, very simply:
-    smsn.pipeline.launch_smsn(vars(args))
+    if not args.HT_condor:
+        smsn.pipeline.launch_smsn(vars(args))
+    else:
+        smsn.condor_binding.launch_smsn_condor(vars(args))
 
 if __name__ == "__main__":
     main()

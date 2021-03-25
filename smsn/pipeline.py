@@ -16,6 +16,19 @@ import pandas as pd
 from pandarallel import pandarallel
 import gc
 
+def call_process(cmd):
+    processname = cmd.split()[0]
+    logging.debug('[DEBUG] (call_process) Processname = {}'.format(processname))
+    logging.debug('[DEBUG] (call_process) cmd = {}'.format(cmd))
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    error_output = process.stderr.read().decode('utf-8')
+    if error_output:
+        logging.error("[ERROR] (stderr output of process {}) : {}".format(processname,error_output))
+    # This will show you eventual errors + will force the kernel to wait the end of the process
+
+    logging.debug("[DEBUG] stdout output  of {} : {}".format(processname,process.stdout.read().decode('utf-8')))
+
 def launch_smsn(args):
     """Launchs the whole pipeline. That's where every functions are called in order.
     Args are parsed from user input through the smsn_launcher.py script"""

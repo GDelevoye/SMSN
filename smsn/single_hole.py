@@ -64,8 +64,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     ' --useccs --bestn 1 --clipping none --bam --out aligned_on_restrictedscaffold_'+str(holeNumber)+\
     '.bam --unaligned '+str(holeNumber)+'.unaligned.fasta'
 
-    aligned_on_restrictedscaffold = os.getcwd()+'/'+'aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
-    logging.debug('Executing {}'.format(cmd))
+    logging.debug('[DEBUG] Executing {}'.format(cmd))
     ###############
     processname = cmd.split()[0]
     logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
@@ -116,7 +115,6 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     ###############
 
     # Perform the analysis itself
-    # We don't switch the mode of ipdSummary with the hack for it has already been made before in the 'true_smrt' function
     results = get_ipdSummary_details('./'+str(holeNumber)+'.bam',
                                      './chunked_ref.fasta',
                                      holeID = holeID,
@@ -137,7 +135,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     logging.debug('[DEBUG] Deleting {}'.format(path_thishole_tmpdir))
     shutil.rmtree(path_thishole_tmpdir,ignore_errors=True)
 
-    return results.copy()
+    return results
 
 
 
