@@ -4,16 +4,17 @@ channels:
   - bioconda
 dependencies:
   - python=3.7
-  - pbcore
-  - pbcoretools
-  - pbbam
-  - blasr
+  - pbcore=2.1.2
+  - pbcoretools=0.8.1
+  - pbbam=1.3.0
+  - pbcommand=2.1.1
+  - blasr=5.3.1
   - samtools=1.9
   - pbccs=3.1
-  - pybigwig
-  - pandas
-  - psutil
-  - ipykernel
+  - pybigwig=0.3.18
+  - pandas=1.2.3
+  - psutil=5.8.0
+  - ipykernel=5.3.4
   - pip:
     - git+https://github.com/PacificBiosciences/kineticsTools.git@665546178ea9284ce7718f204ad2364afbe26514
     - git+https://github.com/GDelevoye/SMSN.git@bf94005fde87e9117c60e440546a833e226af47f
