@@ -10,12 +10,13 @@ __status__ = "Developpment"
 
 import os
 import logging
-from smsn.bam_toolbox import inmemory_asbam, get_hole_id
+from smsn.bam_toolbox import inmemory_asbam
 import pandas as pd
-from smsn.kineticsHack import get_ipdSummary_details
+from smsn.summary_details import launch_ipdSummary
 import copy
 import shutil
-import subprocess
+from smsn.pipeline import call_process
+
 
 def compute_chunk_infos(real_start, real_end, fasta_this_scaffold):
     """Creates a chunk to build a false ref at +100 / -100 of the begin/end where the CCS mapped"""
@@ -63,66 +64,23 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     cmd = 'blasr '+str(holeNumber)+'.bam ./chunked_ref.fasta '+\
     ' --useccs --bestn 1 --clipping none --bam --out aligned_on_restrictedscaffold_'+str(holeNumber)+\
     '.bam --unaligned '+str(holeNumber)+'.unaligned.fasta'
-
-    aligned_on_restrictedscaffold = os.getcwd()+'/'+'aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
-    logging.debug('Executing {}'.format(cmd))
-    ###############
-    processname = cmd.split()[0]
-    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
-    called_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    error_output = called_process.stderr.read().decode('utf-8')
-    if error_output:
-        logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,
-                                                                        called_process.stderr.read().decode('utf-8')))
-    # This will show you eventual errors + will force the kernel to wait the end of the process
-
-    logging.debug(
-        "[DEBUG] stdout output of program {} : {}".format(processname, called_process.stdout.read().decode('utf-8')))
-    ###############
+    call_process(cmd)
 
     # Indexing the mapped .bam
     logging.debug('[DEBUG] (worker_perform_analysis_one_hole) Generating index for the aligned file')
     cmd = 'pbindex aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
-    ###############
-    processname = cmd.split()[0]
-    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
-    called_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    error_output = called_process.stderr.read().decode('utf-8')
-    if error_output:
-        logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,
-                                                                        called_process.stderr.read().decode('utf-8')))
-    # This will show you eventual errors + will force the kernel to wait the end of the process
-
-    logging.debug(
-        "[DEBUG] stdout output of program {} : {}".format(processname, called_process.stdout.read().decode('utf-8')))
-    ###############
+    call_process(cmd)
 
     cmd ='samtools faidx ./chunked_ref.fasta'
-    ###############
-    processname = cmd.split()[0]
-    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
-    called_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    error_output = called_process.stderr.read().decode('utf-8')
-    if error_output:
-        logging.debug("[DEBUG] stdout output of program {} : {}".format(processname,
-                                                                        called_process.stderr.read().decode('utf-8')))
-    # This will show you eventual errors + will force the kernel to wait the end of the process
-
-    logging.debug(
-        "[DEBUG] stdout output of program {} : {}".format(processname, called_process.stdout.read().decode('utf-8')))
-    ###############
+    call_process(cmd)
 
     # Perform the analysis itself
     # We don't switch the mode of ipdSummary with the hack for it has already been made before in the 'true_smrt' function
-    results = get_ipdSummary_details('./'+str(holeNumber)+'.bam',
+    results = launch_ipdSummary('./'+str(holeNumber)+'.bam',
                                      './chunked_ref.fasta',
                                      holeID = holeID,
-                                     args = args)
+                                     args = args) # WE RECIEVE A PD.DATAFRAME
 
-    results = pd.DataFrame(results)
     try:
         results['tpl'] = results['tpl'] +1 + offset# Returning the results into the proper coordinates
     except:
@@ -137,7 +95,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     logging.debug('[DEBUG] Deleting {}'.format(path_thishole_tmpdir))
     shutil.rmtree(path_thishole_tmpdir,ignore_errors=True)
 
-    return results.copy()
+    return results
 
 
 

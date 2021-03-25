@@ -16,6 +16,17 @@ import pandas as pd
 from pandarallel import pandarallel
 import gc
 
+def call_process(cmd):
+    processname = cmd.split()[0]
+    logging.debug('[DEBUG] (call_process) Processname = {}'.format(processname))
+    logging.debug('[DEBUG] (call_process) cmd = {}'.format(cmd))
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    error_output = process.stderr.read().decode('utf-8')
+    if error_output:
+        logging.error("[ERROR] (stderr output of process {}) : {}".format(processname,error_output))
+    # This will show you eventual errors + will force the kernel to wait the end of the process
+
 def launch_smsn(args):
     """Launchs the whole pipeline. That's where every functions are called in order.
     Args are parsed from user input through the smsn_launcher.py script"""
@@ -62,7 +73,7 @@ def launch_smsn(args):
 
     output_alignmentcsv = os.path.join(args["tmpdir"],"aligned_CCS_"+args["moviename"]+".csv")
     logging.debug("[DEBUG] Saving alignment (.csv) at {}".format(output_alignmentcsv))
-    df_aligned_CCS.to_csv(output_alignmentcsv,sep=";")
+    df_aligned_CCS.to_csv(output_alignmentcsv,sep=";",index=False)
 
     ####################################################################################################################
     logging.info('[INFO] Step 2 - 3: Keeping only alignments with >= {} identity'.format(args["min_identity"]))
@@ -135,19 +146,27 @@ def launch_smsn(args):
     if len(proto_df)>0:
         logging.info('[INFO] Analyzing last chunk - n° {} of size {}'.format(chunknb,i))
 
+        ### Indicate the mapping positions:
         df = pd.DataFrame(proto_df)
         outputs = df.parallel_apply(lambda x: smsn.single_hole.analyze_singleHole(x["HoleID"],
-                                                                 x["sam"],
-                                                                 x["scaffold"],
-                                                                 x["start"],
-                                                                 x["end"],
-                                                                 args),
+                                                                                  x["sam"],
+                                                                                  x["scaffold"],
+                                                                                  x["start"],
+                                                                                  x["end"],
+                                                                                  args),
                                     axis=1)  # Simple trick to make it parallel
-        chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
+
+        chunk_csvpath = os.path.join(args["tmpdir"], "tmp_analysis_chunk_" + str(chunknb) + ".csv")
+        logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb, chunk_csvpath))
         outputs = pd.concat([x for x in outputs], ignore_index=True)
-        logging.debug("[DEBUG] chunk_csvpath = {}".format(chunk_csvpath))
-        logging.debug('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
-        outputs.to_csv(chunk_csvpath,sep=";")
+        outputs.to_csv(chunk_csvpath, sep=";")
+
+        chunknb += 1
+        i = 0
+
+        del df
+        del outputs
+        gc.collect()
 
     ####################################################################################################################
     logging.info("[INFO] Compiling all results of all chunks into a single file")
@@ -159,8 +178,11 @@ def launch_smsn(args):
                 tmp_path = os.path.join(args["tmpdir"],elt)
                 compilation.append(pd.read_csv(tmp_path,sep=";"))
 
-
-        pd.concat(compilation,ignore_index=True).to_csv(args["output_csv"],sep=";")
+        list_interest = ["tpl","strand","base","score","tMean","tErr","modelPrediction","ipdRatio","coverage","HoleID","scaffold"]
+        output_df = pd.concat(compilation,ignore_index=True)
+        output_df.sort_values(["HoleID","tpl","strand"],inplace=True)
+        output_df.reset_index(drop=True,inplace=True)
+        output_df[list_interest].to_csv(args["output_csv"],sep=";")
         logging.info('[INFO] Result saved at {}'.format(args["output_csv"]))
         failed = False
 
@@ -202,14 +224,7 @@ def recreate_CCS(subread_file, nbproc,tmpdir):
     cmd = "ccs --minLength 50 --maxLength 50000 --minPasses 0 --minPredictedAccuracy 0.5 --numThreads " + str(
         nbproc) + " " + subread_file + " " + outputbam
     logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
-    ccs_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    error_output = ccs_process.stderr.read().decode('utf-8')
-    if error_output:
-        logging.error("[ERROR] (stderr output of the PacBio CCS program) : {}".format(error_output))
-    # This will show you eventual errors + will force the kernel to wait the end of the process
-
-    logging.debug("[DEBUG] stdout output os PacBio's CCS program :".format(ccs_process.stdout.read().decode('utf-8')))
+    call_process(cmd)
 
     filin = open('ccs_report.txt', "r")
     output_report = filin.read()
@@ -234,15 +249,5 @@ def recreate_CCS(subread_file, nbproc,tmpdir):
 
 def align_CCS(CCS,reference,aligned_CCS,notaligned_CCS,tmpdir,nb_proc):
     cmd = "blasr " + CCS + " " + reference + " --bestn 1 --hitPolicy leftmost --bam --out " + aligned_CCS + " --clipping none --nproc " + str(nb_proc) + " --unaligned " + os.path.join(tmpdir,notaligned_CCS)
-
-    logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
-
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout = p.stdout.read().decode('utf-8')
-    stderr = p.stderr.read().decode("utf-8")
-    if stdout:
-        logging.debug("[DEBUG] BLASR stdout = " + stdout )
-    if stderr:
-        logging.debug("[DEBUG] BLASR stderr = " + stderr)
-
+    call_process(cmd)
     logging.debug('[DEBUG] Mapping DONE for {} on {}. Output canbe found at {}'.format(CCS,reference,aligned_CCS))

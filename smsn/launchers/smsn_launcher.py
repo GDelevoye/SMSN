@@ -120,11 +120,12 @@ def main():
     parser.add_argument('--verbosity',"-v",
                             help='Choose your verbosity. Default: DEBUG',
                             required=False,
-                            default="DEBUG",
+                            default="INFO",
                             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
 
     parser.add_argument('--progress_bar',"-p",
-                            help='Displays a progress bar. Disabled automatically if verbosity is set to debug',
+                            help='Displays a progress bar. Disabled automatically if verbosity is set to debug'\
+                                 '[DEFAULT]: Set to True if DEBUG as verbosity, otherwise FALSE',
                             default=False,
                             required=False,
                             action='store_true')
@@ -158,7 +159,7 @@ def main():
         logging.basicConfig(stream=sys.stdout, level=eval(verboselevel),
                             format='%(asctime)s %(message)s')
     if args.verbosity == "DEBUG":
-        args.progress_bar = False
+        args.progress_bar = True
     elif args.progress_bar:
         show_progress_bar = True
 
