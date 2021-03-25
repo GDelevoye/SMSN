@@ -21,9 +21,12 @@ def call_process(cmd):
     logging.debug('[DEBUG] (call_process) Processname = {}'.format(processname))
     logging.debug('[DEBUG] (call_process) cmd = {}'.format(cmd))
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    std_output = process.stdout.read().decode('utf-8')
+    if std_output.strip():
+        logging.debug("[DEBUG] (stdout of process {} : {}".format(processname,std_output))
 
     error_output = process.stderr.read().decode('utf-8')
-    if error_output:
+    if error_output.strip():
         logging.error("[ERROR] (stderr output of process {}) : {}".format(processname,error_output))
     # This will show you eventual errors + will force the kernel to wait the end of the process
 
@@ -107,7 +110,12 @@ def launch_smsn(args):
             newdict = {}
             newdict["sam"] = args["bam_header"] + samtxt
             newdict["HoleID"] = int(smsn.bam_toolbox.get_hole_id(samtxt))
-            alignment_this_hole = df_aligned_CCS.loc[newdict["HoleID"]]
+            try:
+                alignment_this_hole = df_aligned_CCS.loc[newdict["HoleID"]]
+            except KeyError:
+                logging.warning('[WARNING] Couldnt find HoleID {} in alignments -- PROBLEMLINE'.format(newdict["HoleID"]))
+                continue # Let's just skip the rest
+
             newdict["scaffold"] = alignment_this_hole["scaffold"]
             newdict["start"] = alignment_this_hole["start"]
             newdict["end"] = alignment_this_hole["end"]
