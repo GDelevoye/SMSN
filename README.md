@@ -1,5 +1,6 @@
 # SMSN
-Version of Beaularier SMSN with in-sillico control
+
+Version of Beaularier's SMSN, but with in-sillico control rather than whole-genome amplification, and applied to Sequel I and II data
 
 # Installation 
 
