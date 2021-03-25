@@ -10,6 +10,7 @@ Because the program relies on precise versions of PacBio's tools, python 3.7 MUS
 git clone https://github.com/GDelevoye/SMSN.git
 conda env create -n smsn -f ./SMSN/environment.yml
 conda activate smsn
+pip install -e ./SMSN/
 ```
 
 # Usage
