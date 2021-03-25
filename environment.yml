@@ -1,0 +1,19 @@
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.7
+  - pbcore
+  - pbcoretools
+  - pbbam
+  - blasr
+  - samtools=1.9
+  - pbccs=3.1
+  - pybigwig
+  - pandas
+  - psutil
+  - ipykernel
+  - pip:
+    - git+https://github.com/PacificBiosciences/kineticsTools.git@665546178ea9284ce7718f204ad2364afbe26514
+    - git+https://github.com/GDelevoye/SMSN.git@bf94005fde87e9117c60e440546a833e226af47f
+    - git+https://github.com/nalepae/pandarallel.git@c47005568654dd48bd5da85047242e5ad25fc0f7
