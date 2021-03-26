@@ -22,18 +22,18 @@ def call_process(cmd):
     logging.debug('[DEBUG] (call_process) cmd = {}'.format(cmd))
 
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
+
     std_output = process.stdout.read().decode('utf-8')
     error_output = process.stderr.read().decode('utf-8')
 
     if std_output.strip():
-        logging.debug("[DEBUG] (stdout of process {} : {}".format(processname,std_output.strip().replace('\n','\\n')))
+        logging.debug("[DEBUG] (stdout of process {} : {}\n".format(processname,std_output.strip().replace('\n','\\n')))
 
     if error_output.strip():
         if "INFO" in error_output: # In order to not be spammed by CCS which has a bugged output
-            logging.debug('[DEBUG] (stderr of process {} : {}'.format(processname,error_output.strip().replace('\n','\\n')))
+            logging.debug('[DEBUG] (stderr of process {} : {}\n'.format(processname,error_output.strip().replace('\n','\\n')))
         else:
-            logging.error("[ERROR] (stderr output of process {}) : {}".format(processname,error_output.strip().replace('\n','\\n')))
+            logging.error("[ERROR] (stderr output of process {}) : {}\n".format(processname,error_output.strip().replace('\n','\\n')))
     # This will show you eventual errors + will force the kernel to wait the end of the process
 
 def launch_smsn(args):
