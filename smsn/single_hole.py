@@ -71,7 +71,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     call_process(cmd)
 
     # Map all the subreads restrictively on the scaffold
-    cmd = 'blasr ' + unaligned_bam_path +" "+chunked_ref_path +' --useccs --bestn 1 --clipping none --bam --out '+aligned_bam_path+'.bam --unaligned '+ os.path.join(os.getcwd(),str(holeID)+'.unaligned.fasta')
+    cmd = 'blasr ' + unaligned_bam_path +" "+chunked_ref_path +' --useccs --bestn 1 --clipping none --bam --out '+aligned_bam_path+' --unaligned '+ os.path.join(os.getcwd(),str(holeID)+'.unaligned.fasta')
     call_process(cmd)
 
     # Indexing the mapped .bam
