@@ -81,7 +81,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     # Perform the analysis itself
     # We don't switch the mode of ipdSummary with the hack for it has already been made before in the 'true_smrt' function
-    results = launch_ipdSummary('./aligned_on_restricted_scaffold_'+str(holeNumber)+'.bam',
+    results = launch_ipdSummary('./aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam',
                                      './chunked_ref.fasta',
                                      holeID = holeID,
                                      args = args) # WE RECIEVE A PD.DATAFRAME
