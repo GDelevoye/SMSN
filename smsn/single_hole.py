@@ -80,7 +80,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     call_process(cmd)
 
     logging.debug('[DEBUG] Just before calling ipdSummary, content of directory {} is {}'.format(os.getcwd(),os.listdir(os.getcwd())))
-    logging.debug("[DEBUG] aligned_bam_path = {} and chunked_ref_path = {}".foramt(aligned_bam_path,chunked_ref_path))
+    logging.debug("[DEBUG] aligned_bam_path = {} and chunked_ref_path = {}".format(aligned_bam_path,chunked_ref_path))
 
     # Perform the analysis itself
     results = launch_ipdSummary(aligned_bam_path,
