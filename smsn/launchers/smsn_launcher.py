@@ -150,7 +150,7 @@ def main():
                             help="""Forbids deletion of tmp dir (experimental / deprecated / debug only)""",
                             required=False,
                             default=False,
-                            type=store_true)
+                            type="store_true")
 
 
     args = parser.parse_args()
