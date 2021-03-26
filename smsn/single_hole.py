@@ -60,6 +60,8 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     logging.debug('[DEBUG] (analyze_singleHole) Generating index for the unaligned .bam of holeID {}'.format(holeID))
     cmd = 'pbindex '+unaligned_bam_path
     call_process(cmd)
+    cmd = 'samtools index '+unaligned_bam_path
+    call_process(cmd)
 
     (chunk_start, chunk_end, chunk_size, offset, sequence) = compute_chunk_infos(int(real_start), int(real_end), str(fasta[scaffold]))
 
@@ -77,6 +79,8 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     # Indexing the mapped .bam
     logging.debug('[DEBUG] (analyze_singleHole) Generating index for the aligned .bam on restricted scaffold for hole {}'.format(holeID))
     cmd = 'pbindex '+aligned_bam_path
+    call_process(cmd)
+    cmd = 'samtools index '+aligned_bam_path
     call_process(cmd)
 
     logging.debug('[DEBUG] Just before calling ipdSummary, content of directory {} is {}'.format(os.getcwd(),os.listdir(os.getcwd())))
@@ -100,7 +104,9 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     path_thishole_tmpdir = os.path.join(args["tmpdir"],str(holeID))
     logging.debug('[DEBUG] Deleting {}'.format(path_thishole_tmpdir))
-    shutil.rmtree(path_thishole_tmpdir,ignore_errors=True)
+
+    if not args["preserve_tmpdir"]:
+        shutil.rmtree(path_thishole_tmpdir,ignore_errors=True)
 
     return results
 

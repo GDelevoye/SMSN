@@ -146,6 +146,12 @@ def main():
                             default=5000,
                             type=check_positive)
 
+    parser.add_argument('--preserve_tmpdir',
+                            help="""Forbids deletion of tmp dir (experimental / deprecated / debug only)""",
+                            required=False,
+                            default=False,
+                            type=store_true)
+
 
     args = parser.parse_args()
 
