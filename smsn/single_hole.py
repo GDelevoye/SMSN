@@ -52,7 +52,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     filout.write(inmemory_asbam(samseq)) # We need a clean unaligned .bam
     filout.close()
 
-    aligned_bam_path = os.path.join(os.getcwd(),"aligned_on_restrictedscaffold_"+str(holeID.bam)+".bam")
+    aligned_bam_path = os.path.join(os.getcwd(),"aligned_on_restrictedscaffold_"+str(holeID)+".bam")
     chunked_ref_path = os.path.join(os.getcwd(),"chunked_ref.fasta")
     unaligned_bam_path = os.path.join(os.getcwd(),str(holeID)+".bam")
 
