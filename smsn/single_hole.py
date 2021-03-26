@@ -11,7 +11,7 @@ __status__ = "Developpment"
 import os
 import logging
 from smsn.bam_toolbox import inmemory_asbam
-import pandas as pd
+# import pandas as pd
 from smsn.summary_details import launch_ipdSummary
 import copy
 import shutil
@@ -33,7 +33,7 @@ def compute_chunk_infos(real_start, real_end, fasta_this_scaffold):
     offset = real_start - 100
     sequence = fasta_this_scaffold[chunk_start:chunk_end]
 
-    return (chunk_start, chunk_end, chunk_size, offset, sequence)
+    return chunk_start, chunk_end, chunk_size, offset, sequence
 
 
 def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
@@ -45,18 +45,20 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     HERE = os.getcwd()
     os.chdir(workdir)
 
-    holeNumber = holeID # Just another alias to make copy-paste safe between codes # FIXME
-
     os.system('mkdir -p '+str(holeID))
     os.chdir(str(holeID))
 
-    filout = open(str(holeNumber)+'.bam', 'wb') # Let's drop the .bam file here
+    filout = open(str(holeID)+'.bam', 'wb') # Let's drop the .bam file here
     filout.write(inmemory_asbam(samseq)) # We need a clean unaligned .bam
     filout.close()
 
+    aligned_bam_path = os.path.join(os.getcwd(),"aligned_on_restrictedscaffold_"+str(holeID.bam)+".bam")
+    chunked_ref_path = os.path.join(os.getcwd(),"chunked_ref.fasta")
+    unaligned_bam_path = os.path.join(os.getcwd(),str(holeID)+".bam")
+
     # Indexing the unaligned .bam
-    logging.debug('[DEBUG] (analyze_singleHole) Generating index for the unaligned .bam of holeID {}'.format(holeNumber))
-    cmd = 'pbindex '+str(holeNumber)+'.bam'
+    logging.debug('[DEBUG] (analyze_singleHole) Generating index for the unaligned .bam of holeID {}'.format(holeID))
+    cmd = 'pbindex '+unaligned_bam_path
     call_process(cmd)
 
     (chunk_start, chunk_end, chunk_size, offset, sequence) = compute_chunk_infos(int(real_start), int(real_end), str(fasta[scaffold]))
@@ -64,22 +66,23 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     # Taking only a sub-reference (+ 100 nt / -100 nt) to re-align all the subreads precisely where the CCS mapped
 
     dict_to_fasta({ str(scaffold) : str(sequence) }, './chunked_ref.fasta', specify_HoleID = True)
-    logging.debug('[DEBUG] (analyze_singleHole) Indexing the chunk_ref.fasta of hole {}'.format(holeNumber))
-    cmd ='samtools faidx ./chunked_ref.fasta'
+    logging.debug('[DEBUG] (analyze_singleHole) Indexing the chunk_ref.fasta of hole {}'.format(holeID))
+    cmd ='samtools faidx '+chunked_ref_path
     call_process(cmd)
 
     # Map all the subreads restrictively on the scaffold
-    cmd = 'blasr '+str(holeNumber)+'.bam ./chunked_ref.fasta --useccs --bestn 1 --clipping none --bam --out aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam --unaligned '+str(holeNumber)+'.unaligned.fasta'
+    cmd = 'blasr' + unaligned_bam_path +" "+chunked_ref_path +' --useccs --bestn 1 --clipping none --bam --out '+aligned_bam_path+'.bam --unaligned '+ os.path.join(os.getcwd(),str(holeID)+'.unaligned.fasta')
     call_process(cmd)
 
     # Indexing the mapped .bam
-    logging.debug('[DEBUG] (analyze_singleHole) Generating index for the aligned .bam on restricted scaffold for hole {}'.format(holeNumber))
-    cmd = 'pbindex '+os.path.join(os.path.realpath(HERE),'aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam')
+    logging.debug('[DEBUG] (analyze_singleHole) Generating index for the aligned .bam on restricted scaffold for hole {}'.format(holeID))
+    cmd = 'pbindex '+aligned_bam_path
     call_process(cmd)
 
+
     # Perform the analysis itself
-    results = launch_ipdSummary(os.path.join(workdir,'aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'),
-                                     os.path.join(workdir,'chunked_ref.fasta'),
+    results = launch_ipdSummary(aligned_bam_path,
+                                     chunked_ref_path,
                                      holeID = holeID,
                                      args = args) # WE RECIEVE A PD.DATAFRAME
 
