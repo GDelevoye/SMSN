@@ -60,6 +60,9 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     dict_to_fasta({ str(scaffold) : str(sequence) }, './chunked_ref.fasta', specify_HoleID = True)
 
+    cmd ='samtools faidx ./chunked_ref.fasta'
+    call_process(cmd)
+
     # Map all the subreads restrictively on the scaffold
     cmd = 'blasr '+str(holeNumber)+'.bam ./chunked_ref.fasta '+\
     ' --useccs --bestn 1 --clipping none --bam --out aligned_on_restrictedscaffold_'+str(holeNumber)+\
@@ -69,9 +72,6 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     # Indexing the mapped .bam
     logging.debug('[DEBUG] (worker_perform_analysis_one_hole) Generating index for the aligned file')
     cmd = 'pbindex aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
-    call_process(cmd)
-
-    cmd ='samtools faidx ./chunked_ref.fasta'
     call_process(cmd)
 
     # Perform the analysis itself
