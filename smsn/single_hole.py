@@ -54,12 +54,17 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     filout.write(inmemory_asbam(samseq)) # We need a clean unaligned .bam
     filout.close()
 
+    # Indexing the unaligned .bam
+    logging.debug('[DEBUG] (analyze_singleHole) Generating index for the unaligned .bam of holeID {}'.format(holeNumber))
+    cmd = 'pbindex '+str(holeNumber)+'.bam'
+    call_process(cmd)
+
     (chunk_start, chunk_end, chunk_size, offset, sequence) = compute_chunk_infos(int(real_start), int(real_end), str(fasta[scaffold]))
 
     # Taking only a sub-reference (+ 100 nt / -100 nt) to re-align all the subreads precisely where the CCS mapped
 
     dict_to_fasta({ str(scaffold) : str(sequence) }, './chunked_ref.fasta', specify_HoleID = True)
-
+    logging.debug('[DEBUG] (analyze_singleHole) Indexing the chunk_ref.fasta of hole {}'.format(holeNumber))
     cmd ='samtools faidx ./chunked_ref.fasta'
     call_process(cmd)
 
@@ -70,13 +75,13 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     call_process(cmd)
 
     # Indexing the mapped .bam
-    logging.debug('[DEBUG] (worker_perform_analysis_one_hole) Generating index for the aligned file')
+    logging.debug('[DEBUG] (analyze_singleHole) Generating index for the aligned .bam on restricted scaffold for hole {}'.format(holeNumber))
     cmd = 'pbindex aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
     call_process(cmd)
 
     # Perform the analysis itself
     # We don't switch the mode of ipdSummary with the hack for it has already been made before in the 'true_smrt' function
-    results = launch_ipdSummary('./'+str(holeNumber)+'.bam',
+    results = launch_ipdSummary('./aligned_on_restricted_scaffold_'+str(holeNumber)+'.bam',
                                      './chunked_ref.fasta',
                                      holeID = holeID,
                                      args = args) # WE RECIEVE A PD.DATAFRAME

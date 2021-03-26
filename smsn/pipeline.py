@@ -22,10 +22,11 @@ def call_process(cmd):
     logging.debug('[DEBUG] (call_process) cmd = {}'.format(cmd))
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     std_output = process.stdout.read().decode('utf-8')
+    error_output = process.stderr.read().decode('utf-8')
+
     if std_output.strip():
         logging.debug("[DEBUG] (stdout of process {} : {}".format(processname,std_output))
 
-    error_output = process.stderr.read().decode('utf-8')
     if error_output.strip():
         if "INFO" in error_output: # In order to not be spammed by CCS which has a bugged output
             logging.debug('[DEBUG] (stderr of process {} : {}'.format(processname,error_output))
