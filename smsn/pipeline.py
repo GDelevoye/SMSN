@@ -31,7 +31,9 @@ def call_process(cmd):
         logging.debug("[DEBUG] (stdout of process {} : {}\n".format(processname,std_output.strip().replace('\n','\\n')))
 
     if error_output.strip():
-        if "INFO" in error_output: # In order to not be spammed by CCS which has a bugged output
+        if processname == "ipdSummary":
+            logging.debug('[DEBUG] (ipdSummary calling, stderr =) {}'.format(error_output.strip()))
+        elif "INFO" in error_output: # In order to not be spammed by CCS which has a bugged output
             logging.debug('[DEBUG] (stderr of process {} : {}\n'.format(processname,error_output.strip().replace('\n','\\n')))
         else:
             logging.error("[ERROR] (stderr output of process {}) : {}\n".format(processname,error_output.strip()))

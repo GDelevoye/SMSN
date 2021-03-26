@@ -60,8 +60,8 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     logging.debug('[DEBUG] (analyze_singleHole) Generating index for the unaligned .bam of holeID {}'.format(holeID))
     cmd = 'pbindex '+unaligned_bam_path
     call_process(cmd)
-    cmd = 'samtools index '+unaligned_bam_path
-    call_process(cmd)
+    # cmd = 'samtools index '+unaligned_bam_path
+    # call_process(cmd)
 
     (chunk_start, chunk_end, chunk_size, offset, sequence) = compute_chunk_infos(int(real_start), int(real_end), str(fasta[scaffold]))
 
@@ -80,8 +80,8 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     logging.debug('[DEBUG] (analyze_singleHole) Generating index for the aligned .bam on restricted scaffold for hole {}'.format(holeID))
     cmd = 'pbindex '+aligned_bam_path
     call_process(cmd)
-    cmd = 'samtools index '+aligned_bam_path
-    call_process(cmd)
+    # cmd = 'samtools index '+aligned_bam_path
+    # call_process(cmd)
 
     logging.debug('[DEBUG] Just before calling ipdSummary, content of directory {} is {}'.format(os.getcwd(),os.listdir(os.getcwd())))
     logging.debug("[DEBUG] aligned_bam_path = {} and chunked_ref_path = {}".format(aligned_bam_path,chunked_ref_path))
