@@ -8,7 +8,7 @@ Pre-alpha - Seems to work but not tested
 
 # Installation 
 
-Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used - preferably within a conda environment, and all the requirements listed in environment.yml ***must*** be respected carefully. The only way of not getting wrong is by using a virtual environment manager - e.g conda.
+Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda.
 
 ```console
 git clone https://github.com/GDelevoye/SMSN.git
