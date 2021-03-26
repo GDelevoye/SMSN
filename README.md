@@ -13,6 +13,8 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
+Known issue: Conda takes LOTS of time to build everything. This is due to the conda solver. However, it works in ~ 1 hour on test machines. See  https://github.com/ContinuumIO/anaconda-issues/issues/9480 . Building the environment with https://github.com/mamba-org/mamba might help.
+
 # Usage
 
 ```console
