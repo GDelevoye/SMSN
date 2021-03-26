@@ -69,25 +69,22 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     call_process(cmd)
 
     # Map all the subreads restrictively on the scaffold
-    cmd = 'blasr '+str(holeNumber)+'.bam ./chunked_ref.fasta '+\
-    ' --useccs --bestn 1 --clipping none --bam --out aligned_on_restrictedscaffold_'+str(holeNumber)+\
-    '.bam --unaligned '+str(holeNumber)+'.unaligned.fasta'
+    cmd = 'blasr '+str(holeNumber)+'.bam ./chunked_ref.fasta --useccs --bestn 1 --clipping none --bam --out aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam --unaligned '+str(holeNumber)+'.unaligned.fasta'
     call_process(cmd)
 
     # Indexing the mapped .bam
     logging.debug('[DEBUG] (analyze_singleHole) Generating index for the aligned .bam on restricted scaffold for hole {}'.format(holeNumber))
-    cmd = 'pbindex aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'
+    cmd = 'pbindex '+os.path.join(os.path.realpath(HERE),'aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam')
     call_process(cmd)
 
     # Perform the analysis itself
-    # We don't switch the mode of ipdSummary with the hack for it has already been made before in the 'true_smrt' function
-    results = launch_ipdSummary('./aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam',
-                                     './chunked_ref.fasta',
+    results = launch_ipdSummary(os.path.join(workdir,'aligned_on_restrictedscaffold_'+str(holeNumber)+'.bam'),
+                                     os.path.join(workdir,'chunked_ref.fasta'),
                                      holeID = holeID,
                                      args = args) # WE RECIEVE A PD.DATAFRAME
 
     try:
-        results['tpl'] = results['tpl'] +1 + offset# Returning the results into the proper coordinates
+        results['tpl'] = results['tpl'] + 1 + offset# Returning the results into the proper coordinates
     except:
         results['tpl'] = 'NaN'
 

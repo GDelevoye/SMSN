@@ -22,6 +22,7 @@ def call_process(cmd):
     logging.debug('[DEBUG] (call_process) cmd = {}'.format(cmd))
 
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
 
     std_output = process.stdout.read().decode('utf-8')
     error_output = process.stderr.read().decode('utf-8')
