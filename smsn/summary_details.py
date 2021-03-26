@@ -16,18 +16,12 @@ from smsn.pipeline import call_process
 
 def launch_ipdSummary(aligned_subreads, reference, holeID, args):
     """Returns a list of dicts corresponding to the hacked output of ipdSummary"""
-
-    # reference = os.path.realpath(reference)
-    # alignmentFile = os.path.realpath(aligned_subreads)
-    # Déjà fait ?
-    # logging.debug('[DEBUG] (get_ipdSummary_details) Pbindexing the bam in order to analyze it with ipdSummary')
-    #
-    # cmd = 'pbindex '+str(os.path.realpath(alignmentFile))
-    # call_process(cmd)
-    # logging.debug('[DEBUG] (get_ipdSummary_details) Working on a single mode approach for hole {}'.format(str(holeID)))
+    logging.debug('[DEBUG] (launch_ipdSummary) recieved aligned_subreads = {} and reference = {} and holeID = {}'.format(aligned_subreads,reference,holeID))
 
     workdir = os.path.dirname(aligned_subreads)
-    csvoutput = os.path.join(os.path.join(workdir,str(holeID)),str(holeID)+".csv")
+    csvoutput = os.path.join(workdir,str(holeID)+".csv")
+
+    logging.debug('[DEBUG] (launch_ipdSummary) workdir = {}, csvoutput = {}'.format(workdir,csvoutput))
 
     cmd = 'ipdSummary '+aligned_subreads+' --reference '+reference+' --pvalue 1 --identify m4C,m6A,m5C --csv '+csvoutput+' --log-level '+args["verbosity"]+' --identifyMinCov 3'
     logging.debug('[DEBUG] (simple_ipdSummary_stats) Launching the following cmd: {}'.format(cmd))

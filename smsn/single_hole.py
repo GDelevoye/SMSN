@@ -71,7 +71,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     call_process(cmd)
 
     # Map all the subreads restrictively on the scaffold
-    cmd = 'blasr' + unaligned_bam_path +" "+chunked_ref_path +' --useccs --bestn 1 --clipping none --bam --out '+aligned_bam_path+'.bam --unaligned '+ os.path.join(os.getcwd(),str(holeID)+'.unaligned.fasta')
+    cmd = 'blasr ' + unaligned_bam_path +" "+chunked_ref_path +' --useccs --bestn 1 --clipping none --bam --out '+aligned_bam_path+'.bam --unaligned '+ os.path.join(os.getcwd(),str(holeID)+'.unaligned.fasta')
     call_process(cmd)
 
     # Indexing the mapped .bam
@@ -79,6 +79,8 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     cmd = 'pbindex '+aligned_bam_path
     call_process(cmd)
 
+    logging.debug('[DEBUG] Just before calling ipdSummary, content of directory {} is {}'.format(os.getcwd(),os.listdir(os.getcwd())))
+    logging.debug("[DEBUG] aligned_bam_path = {} and chunked_ref_path = {}".foramt(aligned_bam_path,chunked_ref_path))
 
     # Perform the analysis itself
     results = launch_ipdSummary(aligned_bam_path,
