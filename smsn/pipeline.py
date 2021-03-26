@@ -34,7 +34,7 @@ def call_process(cmd):
         if "INFO" in error_output: # In order to not be spammed by CCS which has a bugged output
             logging.debug('[DEBUG] (stderr of process {} : {}\n'.format(processname,error_output.strip().replace('\n','\\n')))
         else:
-            logging.error("[ERROR] (stderr output of process {}) : {}\n".format(processname,error_output.strip().replace('\n','\\n')))
+            logging.error("[ERROR] (stderr output of process {}) : {}\n".format(processname,error_output.strip()))
     # This will show you eventual errors + will force the kernel to wait the end of the process
 
 def launch_smsn(args):

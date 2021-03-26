@@ -27,7 +27,7 @@ def launch_ipdSummary(aligned_subreads, reference, holeID, args):
     # logging.debug('[DEBUG] (get_ipdSummary_details) Working on a single mode approach for hole {}'.format(str(holeID)))
 
     workdir = os.path.dirname(aligned_subreads)
-    csvoutput = os.path.join(workdir,str(holeID)+".csv")
+    csvoutput = os.path.join(os.path.join(workdir,str(holeID)),str(holeID)+".csv")
 
     cmd = 'ipdSummary '+aligned_subreads+' --reference '+reference+' --pvalue 1 --identify m4C,m6A,m5C --csv '+csvoutput+' --log-level '+args["verbosity"]+' --identifyMinCov 3'
     logging.debug('[DEBUG] (simple_ipdSummary_stats) Launching the following cmd: {}'.format(cmd))
