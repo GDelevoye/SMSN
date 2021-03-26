@@ -4,7 +4,7 @@ Version of Beaularier's SMSN, but with in-sillico control rather than whole-geno
 
 # Status
 
-Pre-alpha - Not tested
+Pre-alpha - Seems to work but not tested
 
 # Installation 
 
