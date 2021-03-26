@@ -13,45 +13,6 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-# Known issue during installation
-
-You might sometimes encounter this:
-
-```console
-(base) [bioclusts01 ~ 10:57]$ conda create -n smsn -f GitHub/SMSN/environment.yml 
-Solving environment: failed
-
-PackagesNotFoundError: The following packages are not available from current channels:
-
-  - github/smsn/environment.yml
-
-Current channels:
-
-  - https://conda.anaconda.org/bioconda/linux-64
-  - https://conda.anaconda.org/bioconda/noarch
-  - https://conda.anaconda.org/r/linux-64
-  - https://conda.anaconda.org/r/noarch
-  - https://repo.anaconda.com/pkgs/main/linux-64
-  - https://repo.anaconda.com/pkgs/main/noarch
-  - https://repo.anaconda.com/pkgs/free/linux-64
-  - https://repo.anaconda.com/pkgs/free/noarch
-  - https://repo.anaconda.com/pkgs/r/linux-64
-  - https://repo.anaconda.com/pkgs/r/noarch
-  - https://repo.anaconda.com/pkgs/pro/linux-64
-  - https://repo.anaconda.com/pkgs/pro/noarch
-  - https://conda.anaconda.org/conda-forge/linux-64
-  - https://conda.anaconda.org/conda-forge/noarch
-```
-
-Whis is a conda bug, that makes it ignore the channels in some conda versions. You can either:
-- Update conda to a newer version
-- Add manually the required channels on your .condarc file :
-
-```console
-conda config --add channels default conda-forge bioconda
-```
-
-
 # Usage
 
 ```console
