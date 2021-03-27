@@ -16,7 +16,8 @@ Pre-alpha - Seems to work but not tested
 - Count about 15.2*2 = 30.4 Mb par hole must be free on the hard drive
 - SSD is adviced, since lots of things happen on the hard drive
 - On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~10s on average
-- min 2GB RAM per processor allocated to the job and 0.13Mb per hole (Each of these two conditions must be met, but don't need to be added)
+- min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
+-- Each of these two conditions must be met, but don't need to be added
 
 # Installation 
 
