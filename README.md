@@ -42,7 +42,7 @@ Only two things are required:
 
 The PacBio tools parse automatically the headers to use the right in-sillico models.
 
-
+ ```console
 (smsn) guillaume@A320MA:~$ smsn --help
 usage: smsn [-h] --bam BAM [--CCS CCS] --reference REFERENCE --output_csv
             OUTPUT_CSV [--min_identity MIN_IDENTITY]
@@ -90,6 +90,7 @@ optional arguments:
                         instead.
   --preserve_tmpdir     Forbids deletion of tmp dir (experimental / deprecated
                         / debug only)
+```
 
 # References
 
