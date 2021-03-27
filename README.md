@@ -34,7 +34,14 @@ Known issue: Conda takes LOTS of time to build everything. This is due to the co
 
 # Usage
 
-Only two things are required: A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed) and a .fasta reference of your genome of interest. The PacBio tools parse automatically the headers to use the propoer in-sillico models.
+Only two things are required: 
+
+* A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed)
+* A .fasta reference of your genome of interest. 
+
+
+The PacBio tools parse automatically the headers to use the right in-sillico models.
+
 
 ```console
 (smsn) guillaume@A320MA:~$ smsn --help
