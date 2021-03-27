@@ -13,7 +13,7 @@ Pre-alpha - Seems to work but not tested
 
 # Hardware requirements and calculation time
 
-- Count about 15.2*2 = 30.4 Mb par hole must be free on the hard drive
+- Count about 15.2Mb par hole must be free on the hard drive in both the tmp_dir and the directory where the .csv output must be produced
 - SSD is adviced, since lots of things happen on the hard drive
 - On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~10s on average
 - min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
@@ -33,6 +33,8 @@ pip install -e ./SMSN/
 Known issue: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/ContinuumIO/anaconda-issues/issues/9480 for more info . Building the environment with https://github.com/mamba-org/mamba might help if installing is really too slow.
 
 # Usage
+
+Only two things are required: A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed) and a .fasta reference of your genome of interest. The PacBio tools parse automatically the headers to use the propoer in-sillico models.
 
 ```console
 (smsn) guillaume@A320MA:~$ smsn --help
