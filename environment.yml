@@ -15,6 +15,7 @@ dependencies:
   - pandas=1.2.3
   - psutil=5.8.0
   - ipykernel
+  - pytest
   - pip:
     - git+https://github.com/PacificBiosciences/kineticsTools.git@665546178ea9284ce7718f204ad2364afbe26514
     - git+https://github.com/GDelevoye/SMSN.git@bf94005fde87e9117c60e440546a833e226af47f

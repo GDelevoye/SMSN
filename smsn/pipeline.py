@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 __author__ = "DELEVOYE Guillaume"
-__credits__ = ["BAHIN Mathieu", "MEYER Eric"]
 __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "DELEVOYE Guillaume"
@@ -197,7 +196,14 @@ def launch_smsn(args):
                 tmp_path = os.path.join(args["tmpdir"],elt)
                 compilation.append(pd.read_csv(tmp_path,sep=";"))
 
-        list_interest = ["tpl","strand","base","score","tMean","tErr","modelPrediction","ipdRatio","coverage","HoleID","scaffold"]
+        list_interest = ["tpl","strand","base","score","tMean","tErr","modelPrediction","ipdRatio","coverage","HoleID","scaffold","isboundary"]
+
+        try:
+            if args["add_context"]:
+                list_interest.append("context")
+        except KeyError:
+            logging.debug('[DEBUG] Adding context in the results -- Skipped')
+
         output_df = pd.concat(compilation,ignore_index=True)
         output_df.sort_values(["HoleID","tpl","strand"],inplace=True)
         output_df.reset_index(drop=True,inplace=True)

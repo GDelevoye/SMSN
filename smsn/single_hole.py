@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 __author__ = "DELEVOYE Guillaume"
-__credits__ = ["BAHIN Mathieu", "MEYER Eric"]
 __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "DELEVOYE Guillaume"
@@ -16,9 +15,7 @@ from smsn.summary_details import launch_ipdSummary
 import copy
 import shutil
 from smsn.pipeline import call_process
-from smsn.fasta_tools import load_fasta_special, compute_chunk_infos, dict_to_fasta
-
-
+from smsn.fasta_tools import load_fasta_special, compute_chunk_infos, dict_to_fasta, get_snipet, load_fasta
 
 def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
@@ -83,6 +80,19 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     results["HoleID"] = int(holeID)
     results["scaffold"] = str(scaffold)
+
+    # Markine the nucleotides that are less than 10nt away from the extremity
+    results["isboundary"] = [min(x-real_start,real_end-x) <= 10 for x in results["tpl"]]
+
+    try:
+        if args["add_context"]:
+            fasta_chunked_ref = load_fasta(chunked_ref_path)
+            results["context"] = results.apply(lambda x: get_snipet(seq=list(fasta_chunked_ref.values())[0],
+                                             position=x["tpl"]-2-offset,
+                                             strand=x["strand"],
+                                             n=12),axis=1)
+    except KeyError:
+        logging.debug("[DEBUG] Adding the contexts is skipped")
 
     os.chdir(HERE)
 

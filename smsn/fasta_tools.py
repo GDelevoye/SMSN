@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 __author__ = "DELEVOYE Guillaume"
-__credits__ = ["BAHIN Mathieu", "MEYER Eric"]
 __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "DELEVOYE Guillaume"
@@ -28,23 +27,57 @@ def load_fasta_special(fastafile):
     return outputdict
 
 def reverse_cpl(seq):
+    """
+    >>> reverse_cpl("GATC")
+    'GATC'
+    >>> reverse_cpl("AT")
+    'AT'
+    >>> reverse_cpl("GNGCTAGN")
+    'NCTAGCNC'
+    """
+
     cpl = {"A": "T", "C": "G", "T": "A", "G": "C", "N": "N"}
     return "".join([cpl[x] for x in seq[::-1]])
 
-def get_snipet(seq, position, n, strand, padding_eachside_upto=12):
-    """Returns the context around n bases (and adds padding if at the extremity of the sequence)
-    'position' msut be 0-based (seq is considered as a python string)"""
+def get_snipet(seq, position, strand, n=12):
+    """Returns the context around +/- n bases (and adds padding if at the extremity of the sequence)
+    'position' msut be 0-based (seq is considered as a python string)
+    n must be even
+
+    >>> testseq = "GATCGCT"
+    >>> get_snipet(testseq,0,0,2)
+    'NNGAT'
+    >>> get_snipet(testseq,position=1,strand=1,n=3)
+    'CGATCNN'
+    >>> get_snipet(testseq,position=6,strand=1,n=3)
+    'NNNAGCG'
+    >>> get_snipet(testseq,position=3,strand=0,n=2)
+    'ATCGC'
+    >>> testseq = "NNGTAGCNGTCAATCG"
+    >>> get_snipet(testseq,position=3,strand=0,n=12)
+    'NNNNNNNNNNNGTAGCNGTCAATCG'
+    >>> reverse = reverse_cpl(testseq)
+    >>> reverse
+    'CGATTGACNGCTACNN'
+    >>> get_snipet(testseq,position=1,strand=1,n=1)
+    'CNN'
+    >>> get_snipet(testseq,position=1,strand=1,n=3)
+    'TACNNNN'
+
+
+    """
     assert n >= 1
     assert position >= 0 and position <= len(seq)
     assert seq
-    assert padding_eachside_upto > 0
     assert strand in [0, 1]
+
+    seq = seq.upper()
 
     left = seq[max(0, position - n):position]
     right = seq[position + 1:min(position + n, len(seq)) + 1]
 
-    left = left.rjust(padding_eachside_upto, "N")
-    right = right.ljust(padding_eachside_upto, "N")
+    left = left.rjust(n, "N")
+    right = right.ljust(n, "N")
 
     returnseq = left + seq[position] + right
 
@@ -82,19 +115,19 @@ def dict_to_fasta(myDict, fastafile, specify_HoleID = False):
 #            strand=0)
 
 
-def compute_chunk_infos(real_start, real_end, fasta_this_scaffold):
+def compute_chunk_infos(real_start, real_end, fasta_this_scaffold,distance=100): #TODO #FIXME Maybe one day replace it by get_snippet that is way more generalistic
     """Creates a chunk to build a false ref at +100 / -100 of the begin/end where the CCS mapped"""
-    if real_start - 100 < 0:
+    if real_start - distance < 0:
         chunk_start = 0
     else:
-        chunk_start = real_start - 100
-    if real_end + 100 > len(fasta_this_scaffold):
+        chunk_start = real_start - distance
+    if real_end + distance > len(fasta_this_scaffold):
         chunk_end = len(fasta_this_scaffold)
     else:
-        chunk_end = real_end + 100
+        chunk_end = real_end + distance
 
     chunk_size = chunk_end - chunk_start
-    offset = real_start - 100
+    offset = real_start - distance
     sequence = fasta_this_scaffold[chunk_start:chunk_end]
 
     return chunk_start, chunk_end, chunk_size, offset, sequence

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 __author__ = "DELEVOYE Guillaume"
-__credits__ = ["BAHIN Mathieu", "MEYER Eric"]
 __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "DELEVOYE Guillaume"
@@ -66,35 +65,50 @@ def main():
                             required=True
                         )
 
-    parser.add_argument("--CCS","-c",
-                        help="[FACULTATIVE] Path to the circular consensus corresponding to the .bam subreads. "
-                             "Default = CCS will be recreated from scratch.",
-                        required=False,
-                        default=None)
-
     parser.add_argument("--reference","-r",
                             help='Path to a genome reference (fasta file).',
                             required=True,
                             default=None)
 
     # parser.add_argument("--model","-m",
-    #                         help='Choose the model for IPD prediction. See '
-    #                              'https://github.com/GDelevoye/ipdtools#-which-model-should-i-use- for more info. '
-    #                              'DEFAULT: Automatic guess according to the input .bam',
+    #                         help='Choose the model for IPD prediction.',
     #                         required=False,
-    #                         choices=["SP2-C2","C2","P4-C2","P5-C3","P6-C4","XL-C2","XL-XL","auto"],
+    #                         choices=["SP2-C2","SP3-C3","P6-C4"],
     #                         default="auto")
-
-    # parser.add_argument("--frequency","-f",
-    #                         help="[NOT MANDATORY] Frequency of the sequencer (Hz). Default = AUTO. In the tested "
-    #                              "datasets, Sequel I had 80Hz and RSII had 75Hz.",
+    #
+    # parser.add_argument("--strategies","-s",
+    #                         help="Strategies to investivate DNA methylation.'
+    #                              'PacBio: Default PacBio scores'
+    #                              'Beulaurier: Beaulaurier 2015 SMsn scores'
+    #                              'MannWhitney_sequential: Non-parametric and Sequential analysis based on median IPD',
     #                         required=False,
-    #                         default = "auto")
+    #                         choices=["PacBio","Beaulaurier","SequentialMannWhitney"],
+    #                         nargs="+",
+    #                         default="auto")
+    #
+    # parser.add_argument('--MannWhitneySequelScore',
+    #                         help='Minimum threshold on the sequential Mann-Whitney test',
+    #                         required=False,
+    #                         default=0.01,
+    #                         type=float)
+    #
+    # parser.add_argument("--frequency","-f",
+    #                         help="[NOT MANDATORY] Frequency of the sequencer (Hz). "
+    #                              "This will only be used if strategy 'beaulaurier' or 'SequentialMannWhitney' are used"
+    #                              "Default = AUTO. In the tested datasets, Sequel I had 80Hz and RSII had 75Hz.",
+    #                         required=False,
+    #                         default = "PacBio")
 
     parser.add_argument('--output_csv',"-o",
                             help='Ouput file (csv) of the methylation analysis. See the README for further details on '
                                  'the output\'s format.',
                             required=True)
+
+    parser.add_argument("--CCS","-c",
+                        help="[FACULTATIVE] Path to the circular consensus corresponding to the .bam subreads. "
+                             "Default = CCS will be recreated from scratch.",
+                        required=False,
+                        default=None)
 
     parser.add_argument('--min_identity',"-i",
                             help='minimum identity (percentage) of the CCS required to launch analysis on a hole.',
@@ -103,7 +117,7 @@ def main():
                             type=float)
 
 
-    parser.add_argument('--min_subreads',"-s",
+    parser.add_argument('--min_subreads',
                             help='Minimum number of subreads required to launch analysis on the hole. DEFAULT = 50 ('
                                  'so that its possible to have >=25X per strand on at least one position) ',
                             required=False,
@@ -146,6 +160,12 @@ def main():
                             default=5000,
                             type=check_positive)
 
+    parser.add_argument('--add_context',
+                            help='In the output .csv file, displays the +12/-12 context around the nucleotide.',
+                            default=False,
+                            required=False,
+                            action='store_true')
+
     parser.add_argument('--preserve_tmpdir',
                             help="""Forbids deletion of tmp dir (experimental / deprecated / debug only)""",
                             required=False,
@@ -174,10 +194,6 @@ def main():
     args.reference = os.path.realpath(args.reference)
     args.bamfile = os.path.realpath(args.bam)
     args.output_csv = os.path.realpath(args.output_csv)
-
-    reference = os.path.realpath(args.reference)
-    bamfile = os.path.realpath(args.bam)
-    output_csv = os.path.realpath(args.output_csv)
 
     ######## Handling framerate of the sequencer
     # This is basically just warning the user if it's frameratehz are a bit weird.

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 __author__ = "DELEVOYE Guillaume"
-__credits__ = ["BAHIN Mathieu", "MEYER Eric"]
 __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "DELEVOYE Guillaume"
