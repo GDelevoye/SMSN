@@ -43,13 +43,12 @@ Only two things are required:
 The PacBio tools parse automatically the headers to use the right in-sillico models.
 
 
-```console
 (smsn) guillaume@A320MA:~$ smsn --help
 usage: smsn [-h] --bam BAM [--CCS CCS] --reference REFERENCE --output_csv
             OUTPUT_CSV [--min_identity MIN_IDENTITY]
             [--min_subreads MIN_SUBREADS] [--tmpdir TMPDIR]
             [--verbosity {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--progress_bar]
-            [--nb_proc NB_PROC] [--sizechunks SIZECHUNKS]
+            [--nb_proc NB_PROC] [--sizechunks SIZECHUNKS] [--preserve_tmpdir]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -89,7 +88,8 @@ optional arguments:
                         from one computer to another. In case sizechunks <
                         nb_proc, SMSN will use sizechunks = 20x nb_proc
                         instead.
-```
+  --preserve_tmpdir     Forbids deletion of tmp dir (experimental / deprecated
+                        / debug only)
 
 # References
 
