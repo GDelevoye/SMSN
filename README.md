@@ -1,6 +1,6 @@
 # SMSN
 
-Version of Beaularier's SMSN, but with in-sillico control rather than whole-genome amplification, and applied to Sequel I and II data
+Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rather than whole-genome amplification, and applied to Sequel I and II data. The SMSN scores are not computed exactly like the ones of Beaulaurier yet - for now it still outputs PacBio's scores.
 
 # Status
 
@@ -90,3 +90,7 @@ optional arguments:
                         nb_proc, SMSN will use sizechunks = 20x nb_proc
                         instead.
 ```
+
+# References
+
+[1] Beaulaurier, J., Zhang, X. S., Zhu, S., Sebra, R., Rosenbluh, C., Deikus, G., ... & Fang, G. (2015). Single molecule-level detection and long read-based phasing of epigenetic variations in bacterial methylomes. Nature communications, 6(1), 1-12.
