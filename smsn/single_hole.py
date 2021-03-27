@@ -16,24 +16,8 @@ from smsn.summary_details import launch_ipdSummary
 import copy
 import shutil
 from smsn.pipeline import call_process
+from smsn.fasta_tools import load_fasta_special, compute_chunk_infos, dict_to_fasta
 
-
-def compute_chunk_infos(real_start, real_end, fasta_this_scaffold):
-    """Creates a chunk to build a false ref at +100 / -100 of the begin/end where the CCS mapped"""
-    if real_start - 100 < 0:
-        chunk_start = 0
-    else:
-        chunk_start = real_start - 100
-    if real_end + 100 > len(fasta_this_scaffold):
-        chunk_end = len(fasta_this_scaffold)
-    else:
-        chunk_end = real_end + 100
-
-    chunk_size = chunk_end - chunk_start
-    offset = real_start - 100
-    sequence = fasta_this_scaffold[chunk_start:chunk_end]
-
-    return chunk_start, chunk_end, chunk_size, offset, sequence
 
 
 def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
@@ -130,30 +114,6 @@ def clean_sam(samseq):
 
     return ('\n'.join(outlines))
 
-def load_fasta_special(fastafile):
-    """Returns a python dict { id : sequence } for the given .fasta file
-    BUT as the name warns it s a SPECIAL way: Only the fist part of the identifier will be taken """
-    with open(os.path.realpath(fastafile), 'r') as filin:
-        fasta = filin.read()
-        fasta = fasta.split('>')[1:]
-        outputdict = { x.split('\n')[0].split()[0] : "".join(x.split('\n')[1:]) for x in fasta}
-    return outputdict
-
-def dict_to_fasta(myDict, fastafile, specify_HoleID = False):
-    """ from a python dict {Identifier:sequence}, writes a fastafile
-    If "specify_HoleID is true, then Identifier is an int and therefore is
-    preceeded by a "Hole_ID" in the .fasta. This is meant to avoid having
-    int-starting identifiers, which is forbidden in many .fasta conventions"""
-    def divide_seq(seq, length = 60, sep = '\n'):
-        """From a full-length sequence, divides it in chunks of 60 letters (most frequent.fasta format)"""
-        return( str(sep).join([seq[x:x+int(length)] for x in range(0, len(seq), length)]))
-        # Tricky one liner --> Splits a sequence into chunks of size "length"
-    with open(os.path.realpath(fastafile), "w") as filout:
-        for key in myDict:
-            if specify_HoleID:
-                filout.write('>'+'HoleID_'+str(key)+'\n'+str(divide_seq(myDict[key]))+'\n')
-            else:
-                filout.write('>'+str(key)+'\n'+str(divide_seq(myDict[key]))+'\n')
 
 
 def reshape_header(samstring):

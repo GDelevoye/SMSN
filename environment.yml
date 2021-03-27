@@ -19,3 +19,4 @@ dependencies:
     - git+https://github.com/PacificBiosciences/kineticsTools.git@665546178ea9284ce7718f204ad2364afbe26514
     - git+https://github.com/GDelevoye/SMSN.git@bf94005fde87e9117c60e440546a833e226af47f
     - git+https://github.com/nalepae/pandarallel.git@c47005568654dd48bd5da85047242e5ad25fc0f7
+    - git+https://github.com/tqdm/tqdm.git@bcce20f771a16cb8e4ac5cc5b2307374a2c0e535
