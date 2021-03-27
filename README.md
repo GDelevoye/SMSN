@@ -30,7 +30,7 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-Known issue: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/ContinuumIO/anaconda-issues/issues/9480 for more info . Building the environment with https://github.com/mamba-org/mamba might help if installing is really too slow.
+Known issue: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/conda/conda/issues/7239 for more info . Building the environment with https://github.com/mamba-org/mamba might help if installing is really too slow.
 
 # Usage
 
