@@ -1,10 +1,23 @@
 # SMSN
 
-Version of Beaularier's SMSN, but with in-sillico control rather than whole-genome amplification, and applied to Sequel I and II data
+Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rather than whole-genome amplification, and applied to Sequel I and II data. The SMSN scores are not computed exactly like the ones of Beaulaurier yet - for now it still outputs PacBio's scores.
 
 # Status
 
-Pre-alpha - Seems to work but not tested
+Pre-alpha - The prototype seems to work correctly but almost nothing has been tested
+
+# Software Requirements
+
+- Linux LTS 20 or later (Other might work but are not tested) - x86-64 bits
+- conda
+
+# Hardware requirements and calculation time
+
+- Count about 15.2Mb par hole must be free on the hard drive in both the tmp_dir and the directory where the .csv output must be produced
+- SSD is adviced, since lots of things happen on the hard drive
+- On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~10s on average
+- min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
+-- Each of these two conditions must be met, but don't need to be added
 
 # Installation 
 
@@ -17,17 +30,25 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-Known issue: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/ContinuumIO/anaconda-issues/issues/9480 for more info . Building the environment with https://github.com/mamba-org/mamba might help if installing is really too slow.
+Known issue: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/conda/conda/issues/7239 for more info . Building the environment with https://github.com/mamba-org/mamba might help if installing is really too slow.
 
 # Usage
 
-```console
+Only two things are required: 
+
+* A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed)
+* A .fasta reference of your genome of interest. 
+
+
+The PacBio tools parse automatically the headers to use the right in-sillico models.
+
+ ```console
 (smsn) guillaume@A320MA:~$ smsn --help
 usage: smsn [-h] --bam BAM [--CCS CCS] --reference REFERENCE --output_csv
             OUTPUT_CSV [--min_identity MIN_IDENTITY]
             [--min_subreads MIN_SUBREADS] [--tmpdir TMPDIR]
             [--verbosity {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--progress_bar]
-            [--nb_proc NB_PROC] [--sizechunks SIZECHUNKS]
+            [--nb_proc NB_PROC] [--sizechunks SIZECHUNKS] [--preserve_tmpdir]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -67,4 +88,10 @@ optional arguments:
                         from one computer to another. In case sizechunks <
                         nb_proc, SMSN will use sizechunks = 20x nb_proc
                         instead.
+  --preserve_tmpdir     Forbids deletion of tmp dir (experimental / deprecated
+                        / debug only)
 ```
+
+# References
+
+[1] Beaulaurier, J., Zhang, X. S., Zhu, S., Sebra, R., Rosenbluh, C., Deikus, G., ... & Fang, G. (2015). Single molecule-level detection and long read-based phasing of epigenetic variations in bacterial methylomes. Nature communications, 6(1), 1-12.
