@@ -11,7 +11,7 @@ Pre-alpha - Seems to work but not tested
 - Linux LTS 20 or later (Other might work but are not tested) - x86-64 bits
 - conda
 
-# Hardware requirements and computational times
+# Hardware requirements and calculation time
 
 - Count about 15.2*2 = 30.4 Mb par hole must be free on the hard drive
 - SSD is adviced, since lots of things happen on the hard drive
