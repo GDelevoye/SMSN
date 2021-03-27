@@ -8,6 +8,8 @@ __maintainer__ = "DELEVOYE Guillaume"
 __email__ = "delevoye@ens.fr"
 __status__ = "Developpment"
 
+"""Get the in-sillico control values from kineticsTools"""
+
 from kineticsTools.ipdModel import IpdModel
 from pkg_resources import Requirement, resource_filename
 import os
@@ -29,6 +31,19 @@ class Contig():
         self.alignmentID = id
 
 class Str2IPD():
+    """This is the object I'd recommend to use to predict ipds according to an in-sillico model.
+    The in-sillico model predicts IPDs on any nucleotide using the N-5/N+4 nucleotide context
+
+    When it is not possible to get the snipet of a given sequence (example: Trying to predict ipds outside of the
+    sequence, or near the end of a sequence), note that a padding with Adenines will be used by PacBio's program.
+
+    Usage:
+    >>> hacked_model = Str2IPD("ATCGATGCGGATTGCGTTGT",model="SP2-C2",indexing=1)
+    >>> hacked_model.predict(position=3,strand=0)
+    1.1981472
+    >>>
+    """
+
     def __init__(self, sequence, name="NO_ID", model="SP2-C2",indexing=1,secure_check=False):
         if secure_check:
             assert not any([character not in ["A","T","C","G","N","a","t","c","g","n"] for character in sequence])
