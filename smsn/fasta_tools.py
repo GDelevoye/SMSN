@@ -87,7 +87,7 @@ def get_snipet(seq, position, strand, n=12):
         return reverse_cpl(returnseq)
 
 
-def dict_to_fasta(myDict, fastafile, specify_HoleID = False):
+def dict_to_fasta(myDict, fastafile):
     """ from a python dict {Identifier:sequence}, writes a fastafile
     If "specify_HoleID is true, then Identifier is an int and therefore is
     preceeded by a "Hole_ID" in the .fasta. This is meant to avoid having
@@ -98,10 +98,7 @@ def dict_to_fasta(myDict, fastafile, specify_HoleID = False):
         # Tricky one liner --> Splits a sequence into chunks of size "length"
     with open(os.path.realpath(fastafile), "w") as filout:
         for key in myDict:
-            if specify_HoleID:
-                filout.write('>'+'HoleID_'+str(key)+'\n'+str(divide_seq(myDict[key]))+'\n')
-            else:
-                filout.write('>'+str(key)+'\n'+str(divide_seq(myDict[key]))+'\n')
+            filout.write('>'+str(key)+'\n'+str(divide_seq(myDict[key]))+'\n')
 
 # # Test the code above
 # test1 = "ATGCTAGCTTTTTCGTGAGGCTGATCGATATATATATAGCGGCGCTAGCTGATCGATTAGCTA"

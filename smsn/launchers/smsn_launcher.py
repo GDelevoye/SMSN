@@ -59,6 +59,13 @@ def main():
             raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
         return ivalue
 
+    def check_pos_or_zero(value):
+        ivalue = int(value)
+        if ivalue < 0:
+            raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+        return ivalue
+
+
     parser.add_argument("--bam","-b",
                             help="Path to a .bam file with all the subreads (adapters sequences must be already "
                                  "removed)",
@@ -122,7 +129,7 @@ def main():
                                  'so that its possible to have >=25X per strand on at least one position) ',
                             required=False,
                             default=50,
-                            type=check_positive)
+                            type=check_pos_or_zero)
 
 
     parser.add_argument('--tmpdir','-t',
