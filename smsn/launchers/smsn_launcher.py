@@ -86,7 +86,7 @@ def main():
     #                         nargs="+",
     #                         default="auto")
     #
-    # parser.add_argument('--MannWhitneySequelScore',
+    # parser.add_argument('--MannWhitneySequential',
     #                         help='Minimum threshold on the sequential Mann-Whitney test',
     #                         required=False,
     #                         default=0.01,
@@ -161,15 +161,23 @@ def main():
                             type=check_positive)
 
     parser.add_argument('--add_context',
-                            help='In the output .csv file, displays the +12/-12 context around the nucleotide.',
-                            default=False,
+                            help='In the output .csv file, displays the +12/-12 context around the nucleotide.'
+                                 '(Files generated can be sensitively heavier) [DEFAUTL: TRUE]',
+                            default=True,
                             required=False,
-                            action='store_true')
+                            type=bool)
 
     parser.add_argument('--preserve_tmpdir',
                             help="""Forbids deletion of tmp dir (experimental / deprecated / debug only)""",
                             required=False,
                             default=False,
+                            action="store_true")
+
+    parser.add_argument('--idQvs',
+                            help="""Outputs PacBio's identificationQV [DEFAULT: TRUE]
+                            A value of -1 means that the identificationQv was not computed by the PacBio softwares""",
+                            required=False,
+                            default=True,
                             action="store_true")
 
 
@@ -265,7 +273,7 @@ def main():
         logging.debug("[DEBUG] Creating {}".format(args.tmpdir))
         os.mkdir(args.tmpdir)
     except OSError as error:
-        logging.error("[ERROR] {}".format(error)) # This can occur, especially if many instances of pt_sort are launched simultaneously
+        logging.error("[ERROR] {}".format(error)) # This can occur, especially if many several of smsn with default tmpdir are launched simultaneously
         # (Because they would have the same outputdir_name)
         # When this happen we can try another time later:
         logging.warning(

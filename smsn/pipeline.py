@@ -27,16 +27,45 @@ def call_process(cmd):
     error_output = process.stderr.read().decode('utf-8')
 
     if std_output.strip():
-        logging.debug("[DEBUG] (stdout of process {} : {}\n".format(processname,std_output.strip().replace('\n','\\n')))
+        if "ERROR" in std_output.strip():
+            logging.error('[ERROR] (stdout of process {} yielded an error: {}'.format(processname,std_output.strip()))
+        else:
+            logging.debug("[DEBUG] (stdout of process {} : {}\n".format(processname,std_output.strip().replace('\n','\\n')))
 
     if error_output.strip():
-        if processname == "ipdSummary":
-            logging.debug('[DEBUG] (ipdSummary calling, stderr =) {}'.format(error_output.strip()))
-        elif "INFO" in error_output: # In order to not be spammed by CCS which has a bugged output
+        if "ERROR" not in error_output and "error" not in error_output: # In order to not be spammed by CCS which has a bugged output
             logging.debug('[DEBUG] (stderr of process {} : {}\n'.format(processname,error_output.strip().replace('\n','\\n')))
         else:
             logging.error("[ERROR] (stderr output of process {}) : {}\n".format(processname,error_output.strip()))
     # This will show you eventual errors + will force the kernel to wait the end of the process
+
+def handle_spaces_reference(referencepath,tmpdir):
+    """A preprocessing is needed because none of the PacBio tools (BLASR, CCS, kineticsTools) handles
+    whitespaces or special characters in theidentifiers of the scaffolds in the .fasta reference file.
+
+    In case the user's reference contains whitespaces in its identifiers, we'll automatically switch them by "_"
+    in another .fasta file located in the tmpdir. Since this can break future analysis, user will be properly
+    warned, and asked to provide whitespace-free references instead."""
+
+    loaded_fasta = smsn.fasta_tools.load_fasta(referencepath)
+
+    contains_some = False
+    for key in list(loaded_fasta):
+        if " " in key:
+            logging.warning('[WARNING] Key {} in .fasta file contains whitespaces or unsupported characters'.format(key))
+            contains_some = True
+        else:
+            pass
+
+    if contains_some:
+        referencename = os.path.basename(referencepath)
+        newfasta = os.path.join(tmpdir,"whitespacefree_"+referencename)
+        loaded_fasta = smsn.fasta_tools.load_fasta_special(referencepath)
+        smsn.fasta_tools.dict_to_fasta(loaded_fasta,newfasta)
+        logging.warning('[warning] Since the identifiers in the .fasta reference contain whitespaces, we built another reference at {}, where identifiers are whitespace-free. This might force you to make additionnal preprocessing before analyzing your results, since the scaffold names are now changed. Please use whitespace-free references'.format(newfasta))
+        return newfasta
+    else:
+        return referencepath
 
 def launch_smsn(args):
     """Launchs the whole pipeline. That's where every functions are called in order.
@@ -45,6 +74,12 @@ def launch_smsn(args):
     bam_header = smsn.bam_toolbox.read_header(args["bam"])
     args["moviename"] = moviename
     args["bam_header"] = bam_header
+
+
+
+    logging.debug("[DEBUG] Ensuring that the .fasta doesn't contained empty spaces in the references")
+    args["reference"] = handle_spaces_reference(args["reference"],args["tmpdir"]) # If there is nothing to change, the reference will stay the same
+    # Otherwise, it will be changed to another ref that will be in the tmpdir
 
     ####################################################################################################################
     logging.info("[INFO] Step 1 : Creating the consensus")
@@ -76,7 +111,7 @@ def launch_smsn(args):
     logging.info('[INFO] Step 2 - 2: Loading the alignment produced')
     df_aligned_CCS = smsn.bam_toolbox.detailed_get_pd_dataframe_alignment(args["aligned_CCS"],include_ipds=False)
 
-    try:
+    try: # Safety check
         assert len(df_aligned_CCS) == len(df_aligned_CCS['HoleID'].unique()) # Just checking that BLASR did everything right
     except AssertionError:
         logging.critical('[CRITICAL] There is not only one alignment per HoleID. The rest of the analysis might be '
@@ -107,57 +142,58 @@ def launch_smsn(args):
     logging.debug("[DEBUG] Entering chunked data + Parallelism")
     logging.info("[INFO] Starting analysis")
     reader = smsn.bam_toolbox.yield_hole_by_hole(args["bam"],
-                                                 header=args["bam_header"],
                                                  restricted_to=set_holes_to_analyse,
                                                  min_subreads=args["min_subreads"])
-    logging.debug("[DEBUG] Reader initialized")
+
+
+    nb_analyzed = 0
+
+    tracked_ignored = []
+
     proto_df = []
     i = 0
     chunknb = 0
-    for samtxt in reader:
-            newdict = {}
-            newdict["sam"] = args["bam_header"] + samtxt
-            newdict["HoleID"] = int(smsn.bam_toolbox.get_hole_id(samtxt))
-            try:
-                alignment_this_hole = df_aligned_CCS.loc[newdict["HoleID"]]
-            except KeyError:
-                logging.warning('[WARNING] Couldnt find HoleID {} in alignments -- PROBLEMLINE'.format(newdict["HoleID"]))
-                continue # Let's just skip the rest
+    for HoleID,ignored,reason,samtxt in reader:
 
-            newdict["scaffold"] = alignment_this_hole["scaffold"]
-            newdict["start"] = alignment_this_hole["start"]
-            newdict["end"] = alignment_this_hole["end"]
+            if not ignored:
+                alignment_this_hole = df_aligned_CCS.loc[HoleID]
+                newdict = {}
+                newdict["HoleID"] = HoleID
+                newdict["sam"] = args["bam_header"] + samtxt
+                newdict["scaffold"] = alignment_this_hole["scaffold"]
+                newdict["start"] = alignment_this_hole["start"]
+                newdict["end"] = alignment_this_hole["end"]
 
-            logging.debug('[DEBUG] New hole added to analysis --> {}, {}, {}, {}'.format(newdict["HoleID"],newdict["scaffold"],newdict['start'],newdict['end']))
-            proto_df.append(newdict.copy())
+                logging.debug('[DEBUG] (pipeline) New hole added to analysis --> HoleID {}, scaffold {}, start {}, end {}, subreads = {}'.format(newdict["HoleID"],newdict["scaffold"],newdict['start'],newdict['end'],len(samtxt.split("\n"))))
+                proto_df.append(newdict.copy())
 
-            i+=1
+                i+=1
 
-            if i >= args["sizechunks"]:
-                logging.info('[INFO] Analyzing chunk n° {} of size {}'.format(chunknb,i))
+                if i >= args["sizechunks"]:
+                    logging.info('[INFO] Analyzing chunk n° {} of size {}'.format(chunknb,i))
 
-                ### Indicate the mapping positions:
-                df = pd.DataFrame(proto_df)
-                outputs = df.parallel_apply(lambda x: smsn.single_hole.analyze_singleHole(x["HoleID"],
-                                                                         x["sam"],
-                                                                         x["scaffold"],
-                                                                         x["start"],
-                                                                         x["end"],
-                                                                         args),axis=1) # Simple trick to make it parallel
+                    ### Indicate the mapping positions:
+                    df = pd.DataFrame(proto_df)
+                    outputs = df.parallel_apply(lambda x: smsn.single_hole.analyze_singleHole(x["HoleID"],
+                                                                             x["sam"],
+                                                                             x["scaffold"],
+                                                                             x["start"],
+                                                                             x["end"],
+                                                                             args),axis=1) # Simple trick to make it parallel
+                    nb_analyzed += len(outputs)
+                    chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
+                    logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
+                    outputs = pd.concat([x for x in outputs],ignore_index=True)
+                    outputs.to_csv(chunk_csvpath,sep=";")
 
-                chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
-                logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
-                outputs = pd.concat([x for x in outputs],ignore_index=True)
-                outputs.to_csv(chunk_csvpath,sep=";")
+                    chunknb += 1
+                    i=0
 
-                chunknb += 1
-                i=0
+                    del df
+                    del outputs
+                    gc.collect()
 
-                del df
-                del outputs
-                gc.collect()
-
-                proto_df = []
+                    proto_df = []
 
 
     # Handling the last chunk (happens if its size is < sizechunks)
@@ -174,6 +210,7 @@ def launch_smsn(args):
                                                                                   args),
                                     axis=1)  # Simple trick to make it parallel
 
+        nb_analyzed += len(outputs)
         chunk_csvpath = os.path.join(args["tmpdir"], "tmp_analysis_chunk_" + str(chunknb) + ".csv")
         logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb, chunk_csvpath))
         outputs = pd.concat([x for x in outputs], ignore_index=True)
@@ -189,15 +226,35 @@ def launch_smsn(args):
     ####################################################################################################################
     logging.info("[INFO] Compiling all results of all chunks into a single file")
 
-    try:
+    if nb_analyzed > 0: # Sometimes, no molecule can be analyzed and it's cleaner to leave like this
+        # than to leave with a python exception traceback
+        pass
+    else:
+        logging.error('[ERROR] Not a single molecule could be analyzed given the following criteria : {}'.format(args))
+        logging.info('[INFO] SMSN ended.')
+        exit(-1)
+
+    ##### HANDLING THE REPORTING OF FAILED HOLES
+
+    logging.info('[INFO] Generating a detailed report file for Holes that have been ignored during analysis.')
+
+    df_ignored = pd.DataFrame(tracked_ignored)
+    outputdir = os.path.dirname(args["output_csv"])
+    output_error_file = os.path.join(outputdir,"failed_holes_"+str(moviename)+"_report.txt")
+    df_ignored.to_csv(output_error_file)
+    #####
+
+    try: # If compilation fails for some reason, be certain that we don't destroy the temporary files
+        # Computation time is expensive and boring for everyone, and also it kills polar bears
+        # So, give a chance to the user to get the best out of what has already been computed
         compilation = []
         for elt in os.listdir(args["tmpdir"]):
             if "tmp_analysis_chunk" in elt:
                 tmp_path = os.path.join(args["tmpdir"],elt)
                 compilation.append(pd.read_csv(tmp_path,sep=";"))
 
-        list_interest = ["tpl","strand","base","score","tMean","tErr","modelPrediction","ipdRatio","coverage","HoleID","scaffold","isboundary"]
-
+        list_interest = ["HoleID","scaffold","tpl","strand","base","score","identificationQv","tMean","tErr","modelPrediction","ipdRatio","coverage","isboundary"]
+        # list_interest = list(compilation[0])
         try:
             if args["add_context"]:
                 list_interest.append("context")
@@ -207,16 +264,16 @@ def launch_smsn(args):
         output_df = pd.concat(compilation,ignore_index=True)
         output_df.sort_values(["HoleID","tpl","strand"],inplace=True)
         output_df.reset_index(drop=True,inplace=True)
-        output_df[list_interest].to_csv(args["output_csv"],sep=";")
+        output_df[list_interest].to_csv(args["output_csv"],sep=";",index=False)
         logging.info('[INFO] Result saved at {}'.format(args["output_csv"]))
         failed = False
 
-    except Exception as e:
+    except Exception as e: # Warn when operation failed (ex: I/O error, server down, whatever)
         logging.error('[ERROR] Compilation of all the output csv files failed with the following error: \n{}'.format(e))
         logging.error("[ERROR] Problem with compiling into {}".format(args["output_csv"]))
         failed = True
 
-    if not failed:
+    if not failed: # Clean the temporary files only if the compilation suceeded
         for filetmp in os.listdir(args["tmpdir"]):
             if "tmp_analysis_chunk" in filetmp:
                 os.remove(os.path.join(args["tmpdir"],filetmp))
@@ -240,13 +297,15 @@ def recreate_CCS(subread_file, nbproc,tmpdir):
     logging.info(
         '[INFO] Recreating the circular consensus from subreads : {}, using {} CPU.'.format(subread_file, nbproc))
 
+    os.system("mkdir -p "+os.path.realpath(tmpdir))
+
     subread_file = os.path.realpath(subread_file)
     subread_dir = os.path.dirname(subread_file)
     moviename = smsn.bam_toolbox.parse_header(subread_file)["PU"]
     outputbam = os.path.join(os.path.realpath(tmpdir), moviename + ".CCS.bam")
 
     # Here I use very laxist parameters so that I'm sure that almost every hole is going to give a consensus
-    cmd = "ccs --minLength 50 --maxLength 50000 --minPasses 0 --minPredictedAccuracy 0.5 --numThreads " + str(
+    cmd = "ccs --minLength 0 --minIdentity 0 --minZScore NaN --minSnr 1 --polish --minReadScore 0 --richQVs --maxLength 5000000 --minPasses 0 --minPredictedAccuracy 0 --numThreads " + str(
         nbproc) + " " + subread_file + " " + outputbam
     logging.debug("[DEBUG] Launching cmd = {}".format(cmd))
     call_process(cmd)
