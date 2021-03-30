@@ -5,6 +5,7 @@ Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rath
 # Status
 
 Pre-alpha - The prototype seems to work correctly but almost nothing has been tested
+Very unstable - Sometimes chemistry is not recognized ("for reasons")
 
 # Software Requirements
 
