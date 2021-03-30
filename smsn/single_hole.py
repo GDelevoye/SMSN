@@ -114,7 +114,6 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     except KeyError:
         logging.debug("[DEBUG] Adding the contexts is skipped")
 
-
     os.chdir(HERE)
 
     path_thishole_tmpdir = os.path.join(args["tmpdir"],str(holeID))

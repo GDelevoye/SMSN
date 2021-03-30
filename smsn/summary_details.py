@@ -24,7 +24,7 @@ def launch_ipdSummary(aligned_subreads, reference, holeID, args):
 
     logging.debug('[DEBUG] (launch_ipdSummary) workdir = {}, csvoutput = {}'.format(workdir,csvoutput))
 
-    cmd = 'ipdSummary '+aligned_subreads+' --reference '+reference+' --pvalue 1 --identify m4C,m6A,m5C --csv '+csvoutput+' --log-level '+args["verbosity"]+' --identifyMinCov 3 --identify m6A,m4C --identifyMinCov 3 --gff '+gffoutput
+    cmd = 'ipdSummary '+aligned_subreads+' --reference '+reference+' --pvalue 1 --identify m4C,m6A,m5C --csv '+csvoutput+' --log-level '+args["verbosity"]+' --identifyMinCov 3 --identify m6A,m4C --identifyMinCov 3 --gff '+gffoutput+" --ipdModel "+args["pathmodel"]
     logging.debug('[DEBUG] (simple_ipdSummary_stats) Launching the following cmd: {}'.format(cmd))
     logging.debug('[DEBUG] Launching ipdSummary (methylation analysis) --> {}'.format(cmd))
     call_process(cmd)

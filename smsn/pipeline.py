@@ -15,6 +15,8 @@ import pandas as pd
 from pandarallel import pandarallel
 import gc
 
+from smsn.extract_model import transform_model_name
+
 def call_process(cmd):
     processname = cmd.split()[0]
     logging.debug('[DEBUG] (call_process) Processname = {}'.format(processname))
@@ -75,7 +77,9 @@ def launch_smsn(args):
     args["moviename"] = moviename
     args["bam_header"] = bam_header
 
-
+    logging.warning('[WARNING] Absolutely no checking is performed for the model. Please be sure of yourself')
+    args["pathmodel"] = transform_model_name(args["model"])
+    logging.info('[INFO] Using model = {}'.format(args["pathmodel"]))
 
     logging.debug("[DEBUG] Ensuring that the .fasta doesn't contained empty spaces in the references")
     args["reference"] = handle_spaces_reference(args["reference"],args["tmpdir"]) # If there is nothing to change, the reference will stay the same
