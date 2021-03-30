@@ -78,50 +78,101 @@ def inmemory_asbam(samstring):
     return(p.stdout)
 
 
-def yield_hole_by_hole(subreads_bamfile, header=None, restricted_to = None, min_subreads = 0):
+def yield_hole_by_hole(subreads_bamfile, header=None, restricted_to=None, min_subreads=0):
     """ Yields the subreads HoleID by HoleID as .bam
     subreads_bamfile must be already sorted by HoleID.
-    "restricted_to" can be the exclusive set of HoleID (int) to include.
+    "restricted_to" can be the exhaustive set of HoleID (int) to include.
+
     Can also exclude the holes with a critically low number of subreads
+
+    Yields a tuple (HoleID,ignored,reason,samtxt)
+
     """
-    firsthole = next(smsn.bam_toolbox.read_bam(subreads_bamfile))
-    firstHoleID = int(firsthole.split()[0].split('/')[1])
 
-    setelt = set()
-    list_return = []
+    def yield_hole(samtxt, header, restricted_to, min_subreads):  # subfunction
+        nbsubreads = len(samtxt)
+        holeID = int(samtxt[0].split("/")[1])
 
-    setelt.add(firstHoleID)
+        samtxt = "\n".join([x.strip() for x in samtxt])
 
-    for line in read_bam(os.path.realpath(subreads_bamfile)):
-        holeID = int(line.split()[0].split('/')[1]) # Just parse the hole
-        if holeID not in setelt:  # Whenever a new HoleID is encountered, this means that we should yield the previous Hole
-            setelt.add(holeID)
+        if header:
+            samtxt = header + samtxt
 
-            if not (restricted_to) or (holeID in restricted_to): # Handling if user specified a restriction list
-                if len(list_return) >= min_subreads:
-                    if header:
-                        yield header + "\n".join([x.strip() for x in list_return])+"\n"
-                    else:
-                        yield "\n".join([x.strip() for x in list_return])+"\n"
-                list_return = []
-                list_return.append(line)
+
+        logging.debug("[DEBUG] (yield_hole) {} subreads for HoleID {}".format(nbsubreads, holeID))
+
+        if restricted_to:
+            logging.debug("[DEBUG] (yield_hole) There's a restriction list")
+            isin_shortlist = holeID in restricted_to
+
+            if not isin_shortlist:
+                logging.debug("[DEBUG] (yield_hole) holeID {} is not in the restriction list".format(holeID))
+                logging.debug("[DEBUG] (yield_hole) HoleID {} Not in shortlist: Skipped".format(holeID))
+                return (holeID, True, "Not in shortlist", None)
             else:
-                list_return = []
+                logging.debug('[DEBUG] (yield_hole) holeID {} is in the shortlist'.format(isin_shortlist))
 
-
-        else: # If the hole is already known, then add this line to the things we'll yield next time
-            list_return.append(line)
-
-    if list_return:  # Don't forget the last line if it is alone:
-        if not(restricted_to) or (holeID in restricted_to):
-            if len(list_return) >= min_subreads:
-                if header:
-                    yield header + "\n".join([x.strip() for x in list_return])+"\n"
-                else:
-                    yield "\n".join([x.strip() for x in list_return])+"\n"
+        # In case it is in the shortlist
+        if nbsubreads < min_subreads: # Check if thats ok for the subreads
+            logging.debug(
+                '[DEBUG] (yield_hole) HoleID {} not enough subreads ({} VS {} min): Skipped'.format(holeID,
+                                                                                                    nbsubreads,
+                                                                                                    min_subreads))
+            return (holeID, True, "Not enough subreads", None)
         else:
-            pass
+            logging.debug("[DEBUG] (yield_hole) HoleID {} has sufficient subreads ({} VS {})".format(holeID,
+                                                                                                     nbsubreads,
+                                                                                                     min_subreads))
 
+        logging.debug('[DEBUG] (yield_hole) HoleID {} yielded successfully'.format(holeID))
+        return (holeID, False, None, samtxt)
+
+    #############################
+
+    if restricted_to:
+        logging.debug("[DEBUG] (yield hole by hole) Size of restriction list = {}".format(len(restricted_to)))
+        logging.debug('[DEBUG] (yield hole by hole). List restriction = {}'.format(restricted_to))
+
+    logging.debug('[DEBUG] (yield by hole). min_subreads = {}'.format(min_subreads))
+
+    reader = smsn.bam_toolbox.read_bam(subreads_bamfile)
+    setEncountered = set()
+    current_yield = []
+
+    first = True
+
+    for current_line in reader:
+        try:
+            current_holeID = int(current_line.split()[0].split('/')[1])
+        except Exception as e:
+            logging.error("[ERROR] (yield hole by hole) Error encountered with the following exception :\n{}".format(e))
+            logging.error("[ERROR] (yield hole by hole) Exiting -1")
+            exit(-1)
+
+        if current_holeID not in setEncountered:
+            logging.debug("[DEBUG] Never encountered {}".format(current_holeID))
+            if first == False:
+                yield yield_hole(samtxt=current_yield, header=header,
+                                 restricted_to=restricted_to, min_subreads=min_subreads)
+                current_yield = []
+                setEncountered.add(current_holeID)
+                current_yield.append(current_line)
+            else:
+                first = False
+                logging.debug('[DEBUG] Not first anymore')
+                setEncountered.add(current_holeID)
+                current_yield.append(current_line)
+        else:
+            current_yield.append(current_line)
+
+    # Don't forget the last line
+    if current_yield:
+        logging.debug("[DEBUG] lastline")
+        logging.debug('[DEBUG] yielding {}'.format(current_holeID))
+        yield yield_hole(samtxt=current_yield, header=header,
+                         restricted_to=restricted_to, min_subreads=min_subreads)
+
+    logging.debug('[DEBUG] Yielding bamfile hole by hole is over')
     return
 
 def parse_header(bamfile):

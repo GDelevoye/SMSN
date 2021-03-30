@@ -10,19 +10,21 @@ __status__ = "Developpment"
 import os
 import logging
 from smsn.bam_toolbox import inmemory_asbam
-# import pandas as pd
 from smsn.summary_details import launch_ipdSummary
 import copy
 import shutil
 from smsn.pipeline import call_process
-from smsn.fasta_tools import load_fasta_special, compute_chunk_infos, dict_to_fasta, get_snipet, load_fasta
+from smsn.fasta_tools import compute_chunk_infos, dict_to_fasta, get_snipet, parse_gff, load_fasta
+import pandas as pd
 
 def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
+
+    logging.debug('[DEBUG] Analyzing single hole {}, mapped on scaffold {} from {} to {}'.format(holeID,scaffold,real_start,real_end))
 
     fastafile = args["reference"]
     workdir = args["tmpdir"]
 
-    fasta = load_fasta_special(os.path.realpath(fastafile))
+    fasta = load_fasta(os.path.realpath(fastafile))
     HERE = os.getcwd()
     os.chdir(workdir)
 
@@ -37,32 +39,38 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     chunked_ref_path = os.path.join(os.getcwd(),"chunked_ref.fasta")
     unaligned_bam_path = os.path.join(os.getcwd(),str(holeID)+".bam")
 
+    logging.debug('[DEBUG] aligned_bam = {}, chunkred_ref = {}, unaligned_bam = {}'.format(aligned_bam_path,chunked_ref_path,unaligned_bam_path))
+
     # Indexing the unaligned .bam
     logging.debug('[DEBUG] (analyze_singleHole) Generating index for the unaligned .bam of holeID {}'.format(holeID))
     cmd = 'pbindex '+unaligned_bam_path
     call_process(cmd)
-    # cmd = 'samtools index '+unaligned_bam_path
-    # call_process(cmd)
+
+    logging.debug('[DEBUG] Computing a chunked ref for holeID {}'.format(holeID))
 
     (chunk_start, chunk_end, chunk_size, offset, sequence) = compute_chunk_infos(int(real_start), int(real_end), str(fasta[scaffold]))
+    logging.debug('[DEBUG] (single analyze_singleHole) Computed chunked ref for holeID {}: scaffold ={}, real_start = {}, real_end = {}'.format(holeID,scaffold,real_start,real_end))
+    logging.debug('[DEBUG] (single analyze_singleHole) Computed chunk_start {}, chunk_end {}, chunk_size {}, offset {}, sequence {}'.format(chunk_start,chunk_end,chunk_size,offset,sequence))
 
     # Taking only a sub-reference (+ 100 nt / -100 nt) to re-align all the subreads precisely where the CCS mapped
 
+<<<<<<< HEAD
+    dict_to_fasta({ str(scaffold) : str(sequence) }, chunked_ref_path)
+=======
     dict_to_fasta({ str(scaffold) : str(sequence) }, './chunked_ref.fasta')
+>>>>>>> main
     logging.debug('[DEBUG] (analyze_singleHole) Indexing the chunk_ref.fasta of hole {}'.format(holeID))
     cmd ='samtools faidx '+chunked_ref_path
     call_process(cmd)
 
     # Map all the subreads restrictively on the scaffold
-    cmd = 'blasr ' + unaligned_bam_path +" "+chunked_ref_path +' --useccs --bestn 1 --clipping none --bam --out '+aligned_bam_path+' --unaligned '+ os.path.join(os.getcwd(),str(holeID)+'.unaligned.fasta')
+    cmd = 'blasr ' + unaligned_bam_path +" "+chunked_ref_path +' --bestn 1 --hitPolicy leftmost --minPctAccuracy 0.75 --clipping none --bam --out '+aligned_bam_path+' --unaligned '+ os.path.join(os.getcwd(),str(holeID)+'_unaligned.fasta')
     call_process(cmd)
 
     # Indexing the mapped .bam
     logging.debug('[DEBUG] (analyze_singleHole) Generating index for the aligned .bam on restricted scaffold for hole {}'.format(holeID))
     cmd = 'pbindex '+aligned_bam_path
     call_process(cmd)
-    # cmd = 'samtools index '+aligned_bam_path
-    # call_process(cmd)
 
     logging.debug('[DEBUG] Just before calling ipdSummary, content of directory {} is {}'.format(os.getcwd(),os.listdir(os.getcwd())))
     logging.debug("[DEBUG] aligned_bam_path = {} and chunked_ref_path = {}".format(aligned_bam_path,chunked_ref_path))
@@ -73,16 +81,32 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
                                      holeID = holeID,
                                      args = args) # WE RECIEVE A PD.DATAFRAME
 
-    try:
-        results['tpl'] = results['tpl'] + 1 + offset# Returning the results into the proper coordinates
-    except:
-        results['tpl'] = 'NaN'
+    # try:
+    if args["idQvs"]:
+        gff = parse_gff('output.gff')
+        gff["strand"] = [0 if x=="+" else 1 for x in gff["strand"]]
+        gff["uniqueID"] = [str(x)+"_"+str(y) for (x,y) in zip(gff["start"],gff["strand"])]
+        results["uniqueID"] = [str(x)+"_"+str(y) for (x,y) in zip(results["tpl"],results["strand"])]
+
+        results = pd.merge(left=results,right=gff[["uniqueID","identificationQv"]],how="outer",on=["uniqueID"])
+        # This operation is necessarly a bit complex since idQv can be computed only for adenines and cytosines
+        # This being said, it's not impossible to understand it: The idQvs are outputed in the .gff only
+        # So we get them from the .gff, and we put them back into the methylationout.csv file, using the fact
+        # that only 1 line is outputed in both file for each physical nucleotide that was sequenced
+    else:
+        logging.debug('[DEBUG] Ignoring the idQVs')
+    # except KeyError:
+    #     logging.debug("[DEBUG] Cannot find 'idQvs in args")
+
+
+    results['tpl'] = results['tpl'] + 1 + offset# Returning the results into the proper coordinates
+
 
     results["HoleID"] = int(holeID)
     results["scaffold"] = str(scaffold)
 
-    # Markine the nucleotides that are less than 10nt away from the extremity
-    results["isboundary"] = [min(x-real_start,real_end-x) <= 10 for x in results["tpl"]]
+    # Marking the nucleotides that are less than 10nt away from the extremity
+    results["isboundary"] = [min(x-real_start,real_end-x) < 10 for x in results["tpl"].astype(int)]
 
     try:
         if args["add_context"]:
@@ -102,7 +126,7 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
     if not args["preserve_tmpdir"]:
         shutil.rmtree(path_thishole_tmpdir,ignore_errors=True)
 
-    return results
+    return results.reset_index(drop=True)
 
 
 

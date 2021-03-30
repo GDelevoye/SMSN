@@ -1,0 +1,1 @@
+smsn --bam ./HTVEG_Coli.subreads.bam --reference ./../e_coli_O157.fasta --output_csv ./methylationout_HTVEG_Coli.csv --verbosity DEBUG --add_context True -p --nb_proc 1 --CCS ./CCS_HTVEG.bam --preserve_tmpdir

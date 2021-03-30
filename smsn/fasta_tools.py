@@ -8,23 +8,80 @@ __email__ = "delevoye@ens.fr"
 __status__ = "Developpment"
 
 import os
+import pandas as pd
+import logging
+
+def parse_gff(gfffile): # Not really a .fasta tool but there's no better place than here
+
+    logging.debug('[DEBUG] Parsing gff {}'.format(gfffile))
+    gfffile = os.path.realpath(gfffile)
+    gfffile = open(gfffile, "r")
+
+    proto_df = []
+    for line in gfffile:
+        if line[0] == "#":
+            continue
+
+        line_dict = {}
+        line = line.split('\t')
+        i = 0
+
+        for elt in ["scaffold", "source", "type", "start", "end", "score", "strand", "phase", "attributes"]:
+            if elt == "attributes":
+                miniline = line[-1].strip()
+                for subelt in miniline.split(';'):
+                    key = subelt.split('=')[0]
+                    value= subelt.split('=')[1]
+                    line_dict[key] = value
+                if "identificationQv" not in miniline:
+                    key = "identificationQv"
+                    value = "NaN"
+                    line_dict[key] = value
+            else:
+                line_dict[elt] = line[i]
+                i += 1
+
+        proto_df.append(line_dict)
+    return pd.DataFrame(proto_df)[
+        ["scaffold", "source", "type", "start", "end", "score", "strand", "phase","coverage","context","IPDRatio","identificationQv"]]
+
 
 def load_fasta(fastafile):
     """Returns a python dict { id : sequence } for the given .fasta file"""
+    logging.debug("[DEBUG] Loading fastafile {}".format(fastafile))
     with open(os.path.realpath(fastafile), 'r') as filin:
         fasta = filin.read()
         fasta = fasta.split('>')[1:]
         outputdict = {x.split('\n')[0].strip(): "".join(x.split('\n')[1:]) for x in fasta}
     return outputdict
 
+
 def load_fasta_special(fastafile):
     """Returns a python dict { id : sequence } for the given .fasta file
-    BUT as the name warns it s a SPECIAL way: Only the fist part of the identifier will be taken """
+    BUT as the name warns it s a SPECIAL way: it returns identifiers in the form "_".join(identifier.split(' '))
+    This is needed since PacBio systematically ignores the " " characters"""
+
+    def handle_characters(name):
+        for elt in [" ","#",".",",",",",",","*","-","&","|","[","]","{","}","\"","\'","~","%","+",">","<","!","?","/","\\","é","è",":"]:
+            name = name.replace(elt,"_")
+        return name
+
+    return_dict = {}
+
     with open(os.path.realpath(fastafile), 'r') as filin:
         fasta = filin.read()
-        fasta = fasta.split('>')[1:]
-        outputdict = { x.split('\n')[0].split()[0] : "".join(x.split('\n')[1:]) for x in fasta}
-    return outputdict
+        fasta = fasta.split('>')[1:] #If the fasta starts with an ">" like it should, then the first split is empty ''
+        # so we take [1:] instead of all the splitted list
+
+        for line in fasta:
+            scaffoldname = line.split('\n')[0].strip()
+            scaffoldname = handle_characters(scaffoldname)
+
+            fastaseq = "".join(line.split('\n')[1:])
+            return_dict[scaffoldname] = fastaseq
+
+    return return_dict
+
 
 def reverse_cpl(seq):
     """
@@ -92,6 +149,7 @@ def dict_to_fasta(myDict, fastafile):
     If "specify_HoleID is true, then Identifier is an int and therefore is
     preceeded by a "Hole_ID" in the .fasta. This is meant to avoid having
     int-starting identifiers, which is forbidden in many .fasta conventions"""
+    logging.debug('[DEBUG] (dict to fasta), fastafile = {}'.format(fastafile))
     def divide_seq(seq, length = 60, sep = '\n'):
         """From a full-length sequence, divides it in chunks of 60 letters (most frequent.fasta format)"""
         return( str(sep).join([seq[x:x+int(length)] for x in range(0, len(seq), length)]))
@@ -112,8 +170,11 @@ def dict_to_fasta(myDict, fastafile):
 #            strand=0)
 
 
-def compute_chunk_infos(real_start, real_end, fasta_this_scaffold,distance=100): #TODO #FIXME Maybe one day replace it by get_snippet that is way more generalistic
+def compute_chunk_infos(real_start, real_end, fasta_this_scaffold, distance=100):
     """Creates a chunk to build a false ref at +100 / -100 of the begin/end where the CCS mapped"""
+
+    logging.debug("[DEBUG] (compute_chunk_infos) real_start = {}, real_end = {}, distance = {}".format(real_start,real_end,distance))
+
     if real_start - distance < 0:
         chunk_start = 0
     else:
@@ -123,8 +184,11 @@ def compute_chunk_infos(real_start, real_end, fasta_this_scaffold,distance=100):
     else:
         chunk_end = real_end + distance
 
+
     chunk_size = chunk_end - chunk_start
-    offset = real_start - distance
+    offset = max(0,real_start - distance)
     sequence = fasta_this_scaffold[chunk_start:chunk_end]
+
+    logging.debug('[DEBUG] (compute_chunk_infos) returning chunk_start = {},chunk_end = {}, chunk_size = {},offset = {}, sequence = {}'.format(chunk_start,chunk_end,chunk_size,offset,sequence))
 
     return chunk_start, chunk_end, chunk_size, offset, sequence

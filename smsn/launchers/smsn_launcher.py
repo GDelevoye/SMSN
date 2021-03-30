@@ -16,37 +16,6 @@ import sys
 import logging
 import psutil
 
-# def handle_chemistry_and_compatibility(modeluser,bamfile):
-#     """Returns the chemistry to use. Logs errors and warnings if potential compatibility problems are detected, or if we
-#     can give some advices."""
-#     logging.debug("[DEBUG] Handling the ipdmodel of user compared to the type of its data")
-#
-#     picked = ""
-#
-#     logging.warning("[WARNING] SMSN is not available to parse all the subtle differences between the Sequel Versions. "
-#                     "Before you analyse your data in details, please make sure that you've read and understood "
-#                     "https://github.com/GDelevoye/ipdtools#-which-model-should-i-use-")
-#
-#     parsed_header = smsn.bam_toolbox.parse_header(bamfile)
-#     if modeluser != "auto":
-#         logging.warning("[WARNING] The model is not selected automatically, which is deprecated outside of very "
-#                         "precise studies.")
-#         picked = modeluser
-#     elif modeluser == "auto":
-#         if parsed_header["PM"] == "SEQUEL":
-#             logging.info("[INFO] Sequel data detected. Model SP2-C2 will be used.")
-#             picked = "SP2-C2"
-#         elif parsed_header["PM"] == "RS":
-#             logging.info("[INFO] RS data detected. Model P5-C3 will be used.")
-#             picked = "P5-C3"
-#         else:
-#             logging.error("[ERROR] Platform unknown : {} (never tested). SP2-C2 (Sequel I/II.2) will be used as "
-#                           "default. Results could be totally wrong.".format(parsed_header["PM"]))
-#             picked = "SP2-C2"
-#             logging.info("[INFO] Trying to use SP2-C2")
-#
-#     return picked
-
 def main():
     """Parses the user's arguments, makes all the required checkings and warnings (if needed), and then launches the
     pipeline """
@@ -59,7 +28,11 @@ def main():
             raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
         return ivalue
 
+<<<<<<< HEAD
+    def check_positive_or_null(value):
+=======
     def check_pos_or_zero(value):
+>>>>>>> main
         ivalue = int(value)
         if ivalue < 0:
             raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
@@ -77,11 +50,11 @@ def main():
                             required=True,
                             default=None)
 
-    # parser.add_argument("--model","-m",
-    #                         help='Choose the model for IPD prediction.',
-    #                         required=False,
-    #                         choices=["SP2-C2","SP3-C3","P6-C4"],
-    #                         default="auto")
+    parser.add_argument("--model","-m",
+                            help='Choose the model for IPD prediction.',
+                            required=False,
+                            choices=["SP2-C2","SP3-C3","P6-C4"],
+                            default="SP2-C2")
     #
     # parser.add_argument("--strategies","-s",
     #                         help="Strategies to investivate DNA methylation.'
@@ -93,7 +66,7 @@ def main():
     #                         nargs="+",
     #                         default="auto")
     #
-    # parser.add_argument('--MannWhitneySequelScore',
+    # parser.add_argument('--MannWhitneySequential',
     #                         help='Minimum threshold on the sequential Mann-Whitney test',
     #                         required=False,
     #                         default=0.01,
@@ -129,7 +102,11 @@ def main():
                                  'so that its possible to have >=25X per strand on at least one position) ',
                             required=False,
                             default=50,
+<<<<<<< HEAD
+                            type=check_positive_or_null)
+=======
                             type=check_pos_or_zero)
+>>>>>>> main
 
 
     parser.add_argument('--tmpdir','-t',
@@ -168,16 +145,24 @@ def main():
                             type=check_positive)
 
     parser.add_argument('--add_context',
-                            help='In the output .csv file, displays the +12/-12 context around the nucleotide.',
-                            default=False,
+                            help='In the output .csv file, displays the +12/-12 context around the nucleotide.'
+                                 '(Files generated can be sensitively heavier) [DEFAUTL: TRUE]',
+                            default=True,
                             required=False,
-                            action='store_true')
+                            type=bool)
 
     parser.add_argument('--preserve_tmpdir',
                             help="""Forbids deletion of tmp dir (experimental / deprecated / debug only)""",
                             required=False,
                             default=False,
                             action="store_true")
+
+    parser.add_argument('--idQvs',
+                            help="""Outputs PacBio's identificationQV [DEFAULT: TRUE]
+                            A value of -1 means that the identificationQv was not computed by the PacBio softwares""",
+                            required=False,
+                            default=True,
+                            type=bool)
 
 
     args = parser.parse_args()
@@ -272,7 +257,7 @@ def main():
         logging.debug("[DEBUG] Creating {}".format(args.tmpdir))
         os.mkdir(args.tmpdir)
     except OSError as error:
-        logging.error("[ERROR] {}".format(error)) # This can occur, especially if many instances of pt_sort are launched simultaneously
+        logging.error("[ERROR] {}".format(error)) # This can occur, especially if many several of smsn with default tmpdir are launched simultaneously
         # (Because they would have the same outputdir_name)
         # When this happen we can try another time later:
         logging.warning(
