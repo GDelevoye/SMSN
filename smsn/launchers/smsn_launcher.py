@@ -28,11 +28,8 @@ def main():
             raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
         return ivalue
 
-<<<<<<< HEAD
-    def check_positive_or_null(value):
-=======
+
     def check_pos_or_zero(value):
->>>>>>> main
         ivalue = int(value)
         if ivalue < 0:
             raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
@@ -102,11 +99,7 @@ def main():
                                  'so that its possible to have >=25X per strand on at least one position) ',
                             required=False,
                             default=50,
-<<<<<<< HEAD
-                            type=check_positive_or_null)
-=======
                             type=check_pos_or_zero)
->>>>>>> main
 
 
     parser.add_argument('--tmpdir','-t',

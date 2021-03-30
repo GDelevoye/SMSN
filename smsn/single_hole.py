@@ -54,11 +54,8 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     # Taking only a sub-reference (+ 100 nt / -100 nt) to re-align all the subreads precisely where the CCS mapped
 
-<<<<<<< HEAD
     dict_to_fasta({ str(scaffold) : str(sequence) }, chunked_ref_path)
-=======
-    dict_to_fasta({ str(scaffold) : str(sequence) }, './chunked_ref.fasta')
->>>>>>> main
+
     logging.debug('[DEBUG] (analyze_singleHole) Indexing the chunk_ref.fasta of hole {}'.format(holeID))
     cmd ='samtools faidx '+chunked_ref_path
     call_process(cmd)
