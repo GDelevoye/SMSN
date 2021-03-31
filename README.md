@@ -128,20 +128,25 @@ SMSN is a prototype and still has some issues.
  
 * **When put in "auto" mode and CCS are not provided by user (default behaviour), SMSN crashes because ipdSummary doesn't recognize the chemistry**
 
-    * Either provide consensus built with CCS 3.0.0 manually **or** specify the model manually (see next section)
+    * Two solutions:
 
-    * The warnings and errors are not implemented correctly
+        * Provide consensus built with CCS 3.0.0 manually **or** 
+        
+        * Specify the model manually with the --model argument (see next section to pick which)
+
+        * The warnings and errors are not implemented correctly
     
-* Some DEBUG/INFO lines might be a bit wrong / imprecise yet
-
-* Only a very tiny proportion of the code is properly tested for now (prototype)
-
 * ipdSummary doesn't output anything for low coverage. If no holeID has sufficiently high effective coverage in the input .bam file, the program might close properly with a decent explicative warning/error. But it might also crash savagely (I didn't tested it sufficiently to know)
 
 * Installation with conda is super-slow (see the dedicated section). It relies on some specific commit of GitHub repositories. 
 
     * If they are unreachable (i.e: GitHub is down, the repository is set in private), which should never happen (but we never know) then the installation would fail and dependencies would have to be installed manually. Everything runs fine on the 03/31/2021. 
-    
+
+* Only a very tiny proportion of the code is properly tested for now (prototype)
+
+* Some DEBUG/INFO lines might be a bit wrong / imprecise yet
+
+
 
 #  <a name="whichmodel"></a> Which model should I use ?
 
