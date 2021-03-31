@@ -14,16 +14,25 @@ Pre-alpha / Prototype
 SMSN is a prototype and still has some issues.
 
 **- Multiprocessing deadlocks can occur, especially if --min_subreads < 50 or --min_identity is too low**
+
 -- This is due to PacBio's kineticsTools / ipdSummary not outputing the .csv or .gff file when the coverage is too low
 -- This is by far the most annoying problem right now, because the program hangs forever without printing any warning when it happens
 -- **To avoid it, I recommand that you don't use --min_subreads < 50 nor --min_identity < 0.99**
+
 - **When put in "auto" mode and CCS are not provided by user (default behaviour), SMSN crashes because ipdSummary doesn't recognize the chemistry**
+
 -- Either provide consensus built with CCS 3.0.0 manually **or** specify the model manually (see next section)
 -- The warnings and errors are not implemented correctly
+
 - Some DEBUG/INFO lines might be a bit wrong / imprecise yet
+
 - Only a very tiny proportion of the code is properly tested for now (prototype)
+
 - ipdSummary doesn't output anything for low coverage. If no holeID has sufficiently high effective coverage in the input .bam file, the program might close properly with a decent explicative warning/error. But it might also crash savagely (I didn't tested it sufficiently to know)
-- Installation with conda is super-slow (see the dedicated section). It relies on some specific commit of GitHub repositories. If they are unreachable (i.e: GitHub is down, the repository is set in private), which should never happen (but we never know) then the installation would fail and dependencies would have to be installed manually. Everything runs fine on the 03/31/2021. 
+
+- Installation with conda is super-slow (see the dedicated section). It relies on some specific commit of GitHub repositories. 
+ 
+--If they are unreachable (i.e: GitHub is down, the repository is set in private), which should never happen (but we never know) then the installation would fail and dependencies would have to be installed manually. Everything runs fine on the 03/31/2021. 
 
 #  <a name="whichmodel"></a> Which model should I use ?
 
