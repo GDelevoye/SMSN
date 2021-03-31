@@ -22,11 +22,10 @@ def call_process(cmd):
     logging.debug('[DEBUG] (call_process) Processname = {}'.format(processname))
     logging.debug('[DEBUG] (call_process) cmd = {}'.format(cmd))
 
-    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
+    process = subprocess.run(cmd, shell=True,capture_output=True)
 
-    std_output = process.stdout.read().decode('utf-8')
-    error_output = process.stderr.read().decode('utf-8')
+    std_output = process.stdout.decode('utf-8')
+    error_output = process.stderr.decode('utf-8')
 
     if std_output.strip():
         if "ERROR" in std_output.strip():
@@ -39,7 +38,7 @@ def call_process(cmd):
             logging.debug('[DEBUG] (stderr of process {} : {}\n'.format(processname,error_output.strip().replace('\n','\\n')))
         else:
             logging.error("[ERROR] (stderr output of process {}) : {}\n".format(processname,error_output.strip()))
-    # This will show you eventual errors + will force the kernel to wait the end of the process
+# This will show you eventual errors + will force the kernel to wait the end of the process
 
 def handle_spaces_reference(referencepath,tmpdir):
     """A preprocessing is needed because none of the PacBio tools (BLASR, CCS, kineticsTools) handles
@@ -52,19 +51,20 @@ def handle_spaces_reference(referencepath,tmpdir):
     loaded_fasta = smsn.fasta_tools.load_fasta(referencepath)
 
     contains_some = False
+    list_specials = [" ","#",".",",",",",",","*","-","&","|","[","]","{","}","\"","\'","~","%","+",">","<","!","?","/","\\","é","è",":"]
     for key in list(loaded_fasta):
-        if " " in key:
-            logging.warning('[WARNING] Key {} in .fasta file contains whitespaces or unsupported characters'.format(key))
+        if any([character in list_specials for character in key]):
             contains_some = True
         else:
             pass
 
     if contains_some:
+        logging.warning('[WARNING] At least one ID in the .fasta file contains whitespaces or unsupported characters.')
         referencename = os.path.basename(referencepath)
         newfasta = os.path.join(tmpdir,"whitespacefree_"+referencename)
         loaded_fasta = smsn.fasta_tools.load_fasta_special(referencepath)
         smsn.fasta_tools.dict_to_fasta(loaded_fasta,newfasta)
-        logging.warning('[warning] Since the identifiers in the .fasta reference contain whitespaces, we built another reference at {}, where identifiers are whitespace-free. This might force you to make additionnal preprocessing before analyzing your results, since the scaffold names are now changed. Please use whitespace-free references'.format(newfasta))
+        logging.warning('[WARNING] Since the identifiers in the .fasta reference contain special characters or whitespaces, we built another reference at {}, where identifiers are whitespace-free without special characters. This might force you to make additionnal preprocessing before analyzing your results, since the scaffold names are now changed. Please rename your scaffolds to avoid future pitfalls.'.format(newfasta))
         return newfasta
     else:
         return referencepath
@@ -74,12 +74,14 @@ def launch_smsn(args):
     Args are parsed from user input through the smsn_launcher.py script"""
     moviename = smsn.bam_toolbox.parse_header(args["bam"])["PU"]
     bam_header = smsn.bam_toolbox.read_header(args["bam"])
+
     args["moviename"] = moviename
     args["bam_header"] = bam_header
 
-    logging.warning('[WARNING] Absolutely no checking is performed for the model. Please be sure of yourself')
-    args["pathmodel"] = transform_model_name(args["model"])
-    logging.info('[INFO] Using model = {}'.format(args["pathmodel"]))
+    if args["model"].upper() != "AUTO":
+        logging.warning('[WARNING] You asked to use model {}, but maybe it will not be appropriate. Please be sure of yourself'.format(args["model"]))
+        args["pathmodel"] = transform_model_name(args["model"])
+        logging.info('[INFO] Using model = {}'.format(args["pathmodel"]))
 
     logging.debug("[DEBUG] Ensuring that the .fasta doesn't contained empty spaces in the references")
     args["reference"] = handle_spaces_reference(args["reference"],args["tmpdir"]) # If there is nothing to change, the reference will stay the same
@@ -138,9 +140,11 @@ def launch_smsn(args):
     ####################################################################################################################
     logging.debug("[DEBUG] Initializing pandarallel")
     if args["progress_bar"] == True: # Initialize pandarallel
+        logging.debug('[DEBUG] Pandarallel will use a progress_bar')
         pandarallel.initialize(progress_bar=True,nb_workers=args["nb_proc"])
     else:
-        pandarallel.initialize(progress_bar=True,nb_workers=args["nb_proc"])
+        logging.debug('[DEBUG] Pandarallel will not use a progress_bar')
+        pandarallel.initialize(progress_bar=False,nb_workers=args["nb_proc"])
 
     ####################################################################################################################
     logging.debug("[DEBUG] Entering chunked data + Parallelism")
@@ -151,9 +155,6 @@ def launch_smsn(args):
 
 
     nb_analyzed = 0
-
-    tracked_ignored = []
-
     proto_df = []
     i = 0
     chunknb = 0
@@ -185,9 +186,10 @@ def launch_smsn(args):
                                                                              x["end"],
                                                                              args),axis=1) # Simple trick to make it parallel
                     nb_analyzed += len(outputs)
-                    chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
-                    logging.info('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
                     outputs = pd.concat([x for x in outputs],ignore_index=True)
+
+                    chunk_csvpath = os.path.join(args["tmpdir"],"tmp_analysis_chunk_"+str(chunknb)+".csv")
+                    logging.debug('[DEBUG] Compiling all results for chunk n° {} into {}'.format(chunknb,chunk_csvpath))
                     outputs.to_csv(chunk_csvpath,sep=";")
 
                     chunknb += 1
@@ -238,15 +240,10 @@ def launch_smsn(args):
         logging.info('[INFO] SMSN ended.')
         exit(-1)
 
-    ##### HANDLING THE REPORTING OF FAILED HOLES
+    outputs = [elt for elt in os.listdir(args["tmpdir"]) if 'tmp_analysis_chunk' in elt]
 
-    logging.info('[INFO] Generating a detailed report file for Holes that have been ignored during analysis.')
-
-    df_ignored = pd.DataFrame(tracked_ignored)
-    outputdir = os.path.dirname(args["output_csv"])
-    output_error_file = os.path.join(outputdir,"failed_holes_"+str(moviename)+"_report.txt")
-    df_ignored.to_csv(output_error_file)
-    #####
+    if len(outputs) < 1:
+        logging.error("[ERROR] No output .csv file")
 
     try: # If compilation fails for some reason, be certain that we don't destroy the temporary files
         # Computation time is expensive and boring for everyone, and also it kills polar bears
@@ -257,17 +254,16 @@ def launch_smsn(args):
                 tmp_path = os.path.join(args["tmpdir"],elt)
                 compilation.append(pd.read_csv(tmp_path,sep=";"))
 
-        list_interest = ["HoleID","scaffold","tpl","strand","base","score","identificationQv","tMean","tErr","modelPrediction","ipdRatio","coverage","isboundary"]
+        list_interest = ["HoleID","scaffold","tpl","strand","base","score","tMean","tErr","modelPrediction","ipdRatio","coverage","isboundary"] # identificationQv, context
         # list_interest = list(compilation[0])
-        try:
-            if args["add_context"]:
-                list_interest.append("context")
-        except KeyError:
-            logging.debug('[DEBUG] Adding context in the results -- Skipped')
+        if args["idQvs"]:
+            list_interest.append("identificationQv")
 
-        output_df = pd.concat(compilation,ignore_index=True)
+        if args["add_context"]:
+            list_interest.append("context")
+
+        output_df = pd.concat(compilation,ignore_index=True).drop_duplicates().reset_index(drop=True)
         output_df.sort_values(["HoleID","tpl","strand"],inplace=True)
-        output_df.reset_index(drop=True,inplace=True)
         output_df[list_interest].to_csv(args["output_csv"],sep=";",index=False)
         logging.info('[INFO] Result saved at {}'.format(args["output_csv"]))
         failed = False

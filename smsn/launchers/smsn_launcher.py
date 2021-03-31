@@ -25,15 +25,31 @@ def main():
     def check_positive(value):
         ivalue = int(value)
         if ivalue <= 0:
-            raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+            raise argparse.ArgumentTypeError("%s is an invalid (strictly) positive int value" % value)
         return ivalue
-
 
     def check_pos_or_zero(value):
         ivalue = int(value)
         if ivalue < 0:
-            raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+            raise argparse.ArgumentTypeError("%s is an invalid positive (or null) int value" % value)
         return ivalue
+
+    def between_0_excluded_and_1_included(value):
+        ivalue = float(value)
+        if ivalue <= 0 or ivalue > 1:
+            raise argparse.ArgumentTypeError("%s is an invalid value between ]0:1]" % value)
+        return ivalue
+
+
+    def str2bool(v):
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
     parser.add_argument("--bam","-b",
@@ -48,10 +64,11 @@ def main():
                             default=None)
 
     parser.add_argument("--model","-m",
-                            help='Choose the model for IPD prediction.',
+                            help="Choose the model for IPD prediction. [DEFAULT: auto (PacBio's kineticsTools software"
+                                 "choses after it has parsed the input file)]",
                             required=False,
-                            choices=["SP2-C2","SP3-C3","P6-C4"],
-                            default="SP2-C2")
+                            choices=["SP2-C2","SP3-C3","P6-C4","auto"],
+                            default="auto")
     #
     # parser.add_argument("--strategies","-s",
     #                         help="Strategies to investivate DNA methylation.'
@@ -88,15 +105,16 @@ def main():
                         default=None)
 
     parser.add_argument('--min_identity',"-i",
-                            help='minimum identity (percentage) of the CCS required to launch analysis on a hole.',
+                            help='minimum identity (percentage) of the CCS required to launch analysis on a hole.'
+                                 '[DEFAULT : 0.99]. Must be in ]0;1]',
                             required=False,
                             default=0.99,
-                            type=float)
+                            type=between_0_excluded_and_1_included)
 
 
     parser.add_argument('--min_subreads',
                             help='Minimum number of subreads required to launch analysis on the hole. DEFAULT = 50 ('
-                                 'so that its possible to have >=25X per strand on at least one position) ',
+                                 'so that its possible to have >=25X per strand on at least one position).',
                             required=False,
                             default=50,
                             type=check_pos_or_zero)
@@ -116,10 +134,9 @@ def main():
 
     parser.add_argument('--progress_bar',"-p",
                             help='Displays a progress bar. Disabled automatically if verbosity is set to debug'\
-                                 '[DEFAULT]: Set to True if DEBUG as verbosity, otherwise FALSE',
+                                 '[DEFAULT]: False',
                             default=False,
-                            required=False,
-                            action='store_true')
+                            type=str2bool)
 
     parser.add_argument('--nb_proc',"-n",
                             help="""Multiprocessing on n CPU. Default: 1.""",
@@ -138,11 +155,11 @@ def main():
                             type=check_positive)
 
     parser.add_argument('--add_context',
-                            help='In the output .csv file, displays the +12/-12 context around the nucleotide.'
-                                 '(Files generated can be sensitively heavier) [DEFAUTL: TRUE]',
+                            help='TIn the output .csv file, displays the +12/-12 context around the nucleotide.'
+                                 '(Files generated can be sensitively heavier) [DEFAULT: True, possible = True or False]',
                             default=True,
                             required=False,
-                            type=bool)
+                            type=str2bool)
 
     parser.add_argument('--preserve_tmpdir',
                             help="""Forbids deletion of tmp dir (experimental / deprecated / debug only)""",
@@ -151,11 +168,10 @@ def main():
                             action="store_true")
 
     parser.add_argument('--idQvs',
-                            help="""Outputs PacBio's identificationQV [DEFAULT: TRUE]
-                            A value of -1 means that the identificationQv was not computed by the PacBio softwares""",
+                            help="""Outputs PacBio's identificationQV [DEFAULT: TRUE]""",
                             required=False,
                             default=True,
-                            type=bool)
+                            type=str2bool)
 
 
     args = parser.parse_args()
@@ -169,10 +185,18 @@ def main():
         verboselevel = "logging."+str(args.verbosity)
         logging.basicConfig(stream=sys.stdout, level=eval(verboselevel),
                             format='%(asctime)s %(message)s')
-    if args.verbosity == "DEBUG":
-        args.progress_bar = True
-    elif args.progress_bar:
-        show_progress_bar = True
+
+    # if args.verbosity == "DEBUG":
+    #     args.progress_bar = True
+    # elif args.progress_bar:
+    #     show_progress_bar = True
+
+    ### Problems that are not fixed
+
+    if args.min_subreads < 50 :
+        logging.warning("[WARNING] Under min_subreads=50, deadlocks can occur because ipdSummary doesn't always produce the proper outputfiles (the bug is not fixed yet). This makes SMSN runs for eternity. In case it happens, please kill the process and restart it using min_subreads=50 instead.")
+    if args.min_identity < 0.9:
+        logging.warning('[WARNING] Under min_identity=0.5, results might not just be hard to interpret, but the program could also crash. Using >0.9 min_identity for the CCS is strongly recommended.')
 
     ######## Passing all the abspath arguments into real paths
 

@@ -40,10 +40,15 @@ def parse_gff(gfffile): # Not really a .fasta tool but there's no better place t
             else:
                 line_dict[elt] = line[i]
                 i += 1
+        if line_dict:
+            proto_df.append(line_dict)
 
-        proto_df.append(line_dict)
-    return pd.DataFrame(proto_df)[
-        ["scaffold", "source", "type", "start", "end", "score", "strand", "phase","coverage","context","IPDRatio","identificationQv"]]
+    if len(proto_df)>0:
+        return pd.DataFrame(proto_df)[
+            ["scaffold", "source", "type", "start", "end", "score", "strand", "phase","coverage","context","IPDRatio","identificationQv"]]
+    else:
+        logging.error('[ERROR] gfffile {} was apparently empty'.format(gfffile))
+        return -1
 
 
 def load_fasta(fastafile):

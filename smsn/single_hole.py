@@ -48,11 +48,11 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
 
     logging.debug('[DEBUG] Computing a chunked ref for holeID {}'.format(holeID))
 
+    # Taking only a sub-reference (+ 100 nt / -100 nt) to re-align all the subreads precisely where the CCS mapped
     (chunk_start, chunk_end, chunk_size, offset, sequence) = compute_chunk_infos(int(real_start), int(real_end), str(fasta[scaffold]))
     logging.debug('[DEBUG] (single analyze_singleHole) Computed chunked ref for holeID {}: scaffold ={}, real_start = {}, real_end = {}'.format(holeID,scaffold,real_start,real_end))
     logging.debug('[DEBUG] (single analyze_singleHole) Computed chunk_start {}, chunk_end {}, chunk_size {}, offset {}, sequence {}'.format(chunk_start,chunk_end,chunk_size,offset,sequence))
 
-    # Taking only a sub-reference (+ 100 nt / -100 nt) to re-align all the subreads precisely where the CCS mapped
 
     dict_to_fasta({ str(scaffold) : str(sequence) }, chunked_ref_path)
 
@@ -78,42 +78,41 @@ def analyze_singleHole(holeID,samseq,scaffold,real_start,real_end,args):
                                      holeID = holeID,
                                      args = args) # WE RECIEVE A PD.DATAFRAME
 
-    # try:
-    if args["idQvs"]:
-        gff = parse_gff('output.gff')
-        gff["strand"] = [0 if x=="+" else 1 for x in gff["strand"]]
-        gff["uniqueID"] = [str(x)+"_"+str(y) for (x,y) in zip(gff["start"],gff["strand"])]
-        results["uniqueID"] = [str(x)+"_"+str(y) for (x,y) in zip(results["tpl"],results["strand"])]
-
-        results = pd.merge(left=results,right=gff[["uniqueID","identificationQv"]],how="outer",on=["uniqueID"])
-        # This operation is necessarly a bit complex since idQv can be computed only for adenines and cytosines
-        # This being said, it's not impossible to understand it: The idQvs are outputed in the .gff only
-        # So we get them from the .gff, and we put them back into the methylationout.csv file, using the fact
-        # that only 1 line is outputed in both file for each physical nucleotide that was sequenced
-    else:
-        logging.debug('[DEBUG] Ignoring the idQVs')
-    # except KeyError:
-    #     logging.debug("[DEBUG] Cannot find 'idQvs in args")
-
-
-    results['tpl'] = results['tpl'] + 1 + offset# Returning the results into the proper coordinates
-
-
     results["HoleID"] = int(holeID)
     results["scaffold"] = str(scaffold)
 
-    # Marking the nucleotides that are less than 10nt away from the extremity
-    results["isboundary"] = [min(x-real_start,real_end-x) < 10 for x in results["tpl"].astype(int)]
+    if results.iloc[0]["scaffold"] != "ERROR: CSV WAS EMPTY":
 
-    try:
+
+        if args["idQvs"]:
+            gff = parse_gff('output.gff')
+
+            if not isinstance(gff,int): # The function return -1 if nothing can be found
+                gff["strand"] = [0 if x=="+" else 1 for x in gff["strand"]]
+                gff["uniqueID"] = [str(x)+"_"+str(y) for (x,y) in zip(gff["start"],gff["strand"])]
+                results["uniqueID"] = [str(x)+"_"+str(y) for (x,y) in zip(results["tpl"],results["strand"])]
+
+                results = pd.merge(left=results,right=gff[["uniqueID","identificationQv"]],how="outer",on=["uniqueID"])
+                # This operation is necessarly a bit complex since idQv can be computed only for adenines and cytosines
+                # This being said, it's not impossible to understand it: The idQvs are outputed in the .gff only
+                # So we get them from the .gff, and we put them back into the methylationout.csv file, using the fact
+                # that only 1 line is outputed in both file for each physical nucleotide that was sequenced
+        else:
+            logging.debug('[DEBUG] Ignoring the idQVs')
+
+        # WARNING --> Order matters here. results["tpl"] = [...] must be performed before seeking the context
+        results['tpl'] = results['tpl'] + 1 + offset# Returning the results into the proper coordinates
+        # Marking the nucleotides that are less than 10nt away from the extremity
+        results["isboundary"] = [min(x-real_start,real_end-x) < 10 for x in results["tpl"].astype(int)]
+
+
         if args["add_context"]:
             fasta_chunked_ref = load_fasta(chunked_ref_path)
+            # print("fasta = {}, tpl = {}, strand = {}".format(list(fasta_chunked_ref.values())[0],results["tpl"],results["strand"]))
             results["context"] = results.apply(lambda x: get_snipet(seq=list(fasta_chunked_ref.values())[0],
-                                             position=x["tpl"]-2-offset,
-                                             strand=x["strand"],
-                                             n=12),axis=1)
-    except KeyError:
-        logging.debug("[DEBUG] Adding the contexts is skipped")
+                                                                    position=x["tpl"] - 2 - offset,
+                                                                    strand=x["strand"],
+                                                                    n=12), axis=1)
 
     os.chdir(HERE)
 
