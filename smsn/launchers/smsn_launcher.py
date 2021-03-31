@@ -66,9 +66,8 @@ def main():
     parser.add_argument("--model","-m",
                             help="Choose the model for IPD prediction. [DEFAULT: auto (PacBio's kineticsTools software"
                                  "choses after it has parsed the input file)]",
-                            required=False,
-                            choices=["SP2-C2","SP3-C3","P6-C4","auto"],
-                            default="auto")
+                            required=True,
+                            choices=["SP2-C2","SP3-C3","P6-C4"])
     #
     # parser.add_argument("--strategies","-s",
     #                         help="Strategies to investivate DNA methylation.'
