@@ -41,10 +41,8 @@ optional arguments:
                         sequences must be already removed)
   --reference REFERENCE, -r REFERENCE
                         Path to a genome reference (fasta file).
-  --model {SP2-C2,SP3-C3,P6-C4,auto}, -m {SP2-C2,SP3-C3,P6-C4,auto}
-                        Choose the model for IPD prediction. [DEFAULT: auto
-                        (PacBio's kineticsTools softwarechoses after it has
-                        parsed the input file)]
+  --model {SP2-C2,SP3-C3,P6-C4,auto}, -m {SP2-C2,SP3-C3,P6-C4}
+                        [REQUIRED] Choose the model for IPD prediction. ]
   --output_csv OUTPUT_CSV, -o OUTPUT_CSV
                         Ouput file (csv) of the methylation analysis. See the
                         README for further details on the output's format.
