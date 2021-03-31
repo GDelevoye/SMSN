@@ -150,6 +150,8 @@ SMSN is a prototype and still has some issues.
 
 #  <a name="whichmodel"></a> Which model should I use ?
 
+As described in the section above, **the --model argument is actually **required** in the default configuration. You have to indicate yours
+
 Available models are:
 
 * P6-C4
