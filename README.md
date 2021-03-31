@@ -4,21 +4,57 @@ Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rath
 
 # Status
 
-Pre-alpha - The prototype seems to work correctly but almost nothing has been tested
-Very unstable - Sometimes chemistry is not recognized ("for reasons")
+Pre-alpha / Prototype
+
+- Seems to work correctly with SequelI data
+- Lots of tests are lacking
+
+# /!\ IMPORTANT /!\ Known problems
+
+SMSN is a prototype and still has some issues.
+
+**- Multiprocessing deadlocks can occur, especially if --min_subreads < 50 or --min_identity is too low**
+-- This is due to PacBio's kineticsTools / ipdSummary not outputing the .csv or .gff file when the coverage is too low
+-- This is by far the most annoying problem right now, because the program hangs forever without printing any warning when it happens
+-- **To avoid it, I recommand that you don't use --min_subreads < 50 nor --min_identity < 0.99**
+- **When put in "auto" mode and CCS are not provided by user (default behaviour), SMSN crashes because ipdSummary doesn't recognize the chemistry**
+-- Either provide consensus built with CCS 3.0.0 manually **or** specify the model manually (see next section)
+-- The warnings and errors are not implemented correctly
+- Some DEBUG/INFO lines might be a bit wrong / imprecise yet
+- Only a very tiny proportion of the code is properly tested for now (prototype)
+- ipdSummary doesn't output anything for low coverage. If no holeID has sufficiently high effective coverage in the input .bam file, the program might close properly with a decent explicative warning/error. But it might also crash savagely (I didn't tested it sufficiently to know)
+- Installation with conda is super-slow (see the dedicated section). It relies on some specific commit of GitHub repositories. If they are unreachable (i.e: GitHub is down, the repository is set in private), which should never happen (but we never know) then the installation would fail and dependencies would have to be installed manually. Everything runs fine on the 03/31/2021. 
+
+#  <a name="whichmodel"></a> Which model should I use ?
+
+Available models are:
+
+* P6-C4
+* SP2-C2
+* SP3-C2
+
+**SP2-C2** is recommended for **Sequel I** chemistries
+**SP3-C3** is recommanded for **Sequel IIv2** chemistries
+**Most RSII user would probably want to use P5-C3 model, which is not supported yet**
+
+> See [here](https://github.com/PacificBiosciences/kineticsTools/pull/71) for more info.
+
 
 # Software Requirements
 
 - Linux LTS 20 or later (Other might work but are not tested) - x86-64 bits
-- conda
+- conda 4.7.10 or later
 
 # Hardware requirements and calculation time
 
 - Count about 15.2Mb par hole must be free on the hard drive in both the tmp_dir and the directory where the .csv output must be produced
 - SSD is adviced, since lots of things happen on the hard drive
-- On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~10s on average
+- On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~5 to 10s on average depending on the parameters and input files
+- The size of the files generated varies a lot, but can easily reach several GB per run. Make sure you have the free space
 - min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
 -- Each of these two conditions must be met, but don't need to be added
+
+**WARNING: When SMSN crashes because there's not enough RAM on Linux, don't expect to have an informative log. It will just crash**
 
 # Installation 
 
