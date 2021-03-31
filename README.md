@@ -14,30 +14,6 @@ Pre-alpha / Prototype
 - Linux LTS 20 or later (Other might work but are not tested) - x86-64 bits
 - conda 4.7.10 or later
 
-# Hardware requirements and calculation time
-
-- Count about 15.2Mb par hole must be free on the hard drive in both the tmp_dir and the directory where the .csv output must be produced
-- SSD is adviced, since lots of things happen on the hard drive
-- On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~5 to 10s on average depending on the parameters and input files
-- The size of the files generated varies a lot, but can easily reach several GB per run. Make sure you have the free space
-- min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
--- Each of these two conditions must be met, but don't need to be added
-
-**WARNING: When SMSN crashes because there's not enough RAM on Linux, don't expect to have an informative log. It will just crash**
-
-# Installation 
-
-Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda.
-
-```console
-git clone https://github.com/GDelevoye/SMSN.git
-conda env create -n smsn -f ./SMSN/environment.yml
-conda activate smsn
-pip install -e ./SMSN/
-```
-
-Known issue: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/conda/conda/issues/7239 for more info . Building the environment with https://github.com/mamba-org/mamba might help if installing is really too slow.
-
 # Usage
 
 Only two things are required: 
@@ -111,6 +87,31 @@ optional arguments:
                         / debug only)
   --idQvs IDQVS         Outputs PacBio's identificationQV [DEFAULT: TRUE]
 ```
+
+# Installation 
+
+Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda.
+
+```console
+git clone https://github.com/GDelevoye/SMSN.git
+conda env create -n smsn -f ./SMSN/environment.yml
+conda activate smsn
+pip install -e ./SMSN/
+```
+
+**Known issue**: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/conda/conda/issues/7239 for more info . Building the environment with **mamba** instead of conda ( https://github.com/mamba-org/mamba ) might help if installing is really too slow.
+
+
+# Hardware requirements and calculation time
+
+- Count about 15.2Mb par hole must be free on the hard drive in both the tmp_dir and the directory where the .csv output must be produced
+- SSD is adviced, since lots of things happen on the hard drive
+- On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~5 to 10s on average depending on the parameters and input files
+- The size of the files generated varies a lot, but can easily reach several GB per run. Make sure you have the free space
+- min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
+-- Each of these two conditions must be met, but don't need to be added
+
+**WARNING: When SMSN crashes because there's not enough RAM on Linux, don't expect to have an informative log. It will just crash**
 
 
 # /!\ IMPORTANT /!\ Known problems
