@@ -24,7 +24,7 @@ Only two files are required:
 
 ~~The PacBio tools parse automatically the headers to use the right in-sillico models.~~
 
-**You need to indicate the in-sillico. See the dedicated section to known which one you should use**
+**You need to indicate the in-sillico model in parameters. See the dedicated section to known which one you should use**. Available models are SP2-C2, CP3-C3, P6-C4. Only SP2-C2 has been tested for now.
 
  ```console
 (smsn) guillaume@A320MA:~$ smsn --help
