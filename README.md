@@ -16,13 +16,15 @@ Pre-alpha / Prototype
 
 # Usage
 
-Only two things are required: 
+Only two files are required: 
 
 * A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed)
 * A .fasta reference of your genome of interest. 
 
 
-The PacBio tools parse automatically the headers to use the right in-sillico models.
+~~The PacBio tools parse automatically the headers to use the right in-sillico models.~~
+
+**You need to indicate the in-sillico. See the dedicated section to known which one you should use**
 
  ```console
 (smsn) guillaume@A320MA:~$ smsn --help
@@ -86,6 +88,24 @@ optional arguments:
   --idQvs IDQVS         Outputs PacBio's identificationQV [DEFAULT: TRUE]
 ```
 
+
+#  <a name="whichmodel"></a> Which model should I use ?
+
+As described in the section above, **the --model argument is actually required** in the default configuration. You have to indicate yours
+
+Available models are:
+
+* P6-C4
+* SP2-C2
+* SP3-C2
+
+**SP2-C2** is recommended for **Sequel I** chemistries
+**SP3-C3** is recommanded for **Sequel IIv2** chemistries
+**Most RSII user would probably want to use P5-C3 model, which is not supported yet**
+
+> See [here](https://github.com/PacificBiosciences/kineticsTools/pull/71) for more info.
+
+
 # Installation 
 
 Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda.
@@ -102,17 +122,16 @@ pip install -e ./SMSN/
 
 # Hardware requirements and calculation time
 
-- Count about 15.2Mb par hole must be free on the hard drive in both the tmp_dir and the directory where the .csv output must be produced
-- SSD is adviced, since lots of things happen on the hard drive
-- On a ryzen 5 2600 + HDD 7200tr/mn, 1 CPU handles a hole in about ~5 to 10s on average depending on the parameters and input files
-- The size of the files generated varies a lot, but can easily reach several GB per run. Make sure you have the free space
+- SSD is adviced
+- 1 recent CPU handles a hole in about ~5 to 10s on average (order of magnitude)
+- The size of the files generated varies a lot, but can easily reach several GB per run. 
 - min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
 -- Each of these two conditions must be met, but don't need to be added
 
 **WARNING: When SMSN crashes because there's not enough RAM on Linux, don't expect to have an informative log. It will just crash**
 
 
-# /!\ IMPORTANT /!\ Known problems
+# Known problems
 
 SMSN is a prototype and still has some issues.
 
@@ -134,33 +153,14 @@ SMSN is a prototype and still has some issues.
 
         * The warnings and errors are not implemented correctly
     
-* ipdSummary doesn't output anything for low coverage. If no holeID has sufficiently high effective coverage in the input .bam file, the program might close properly with a decent explicative warning/error. But it might also crash savagely (I didn't tested it sufficiently to know)
+* Bugs can occur when the coverage is really low for all HoleID
 
-* Installation with conda is super-slow (see the dedicated section). It relies on some specific commit of GitHub repositories. 
-
-    * If they are unreachable (i.e: GitHub is down, the repository is set in private), which should never happen (but we never know) then the installation would fail and dependencies would have to be installed manually. Everything runs fine on the 03/31/2021. 
+* Installation with conda is super-slow (see the dedicated section). 
 
 * Only a very tiny proportion of the code is properly tested for now (prototype)
 
 * Some DEBUG/INFO lines might be a bit wrong / imprecise yet
 
-
-
-#  <a name="whichmodel"></a> Which model should I use ?
-
-As described in the section above, **the --model argument is actually required** in the default configuration. You have to indicate yours
-
-Available models are:
-
-* P6-C4
-* SP2-C2
-* SP3-C2
-
-**SP2-C2** is recommended for **Sequel I** chemistries
-**SP3-C3** is recommanded for **Sequel IIv2** chemistries
-**Most RSII user would probably want to use P5-C3 model, which is not supported yet**
-
-> See [here](https://github.com/PacificBiosciences/kineticsTools/pull/71) for more info.
 
 # References
 
