@@ -8,7 +8,7 @@ setup(
     author='DELEVOYE Guillaume',
     license=open('LICENSE.txt').read(),
     packages=find_packages("."),
-    python_requires='=3.7',
+    python_requires='3.7',
     package_data={'smsn': ['resources/']},
     entry_points={'console_scripts': [
         "smsn = smsn.launchers.smsn_launcher:main",
