@@ -6,12 +6,10 @@ Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rath
 
 Prototype, for research purpose only
 
-- Ran fine on real world data (Sequel I data), Ubuntu 20 LTS x86
--- Not tested in any other platform
+- Ran fine on real world data (Sequel I data)
+- Only tested on Ubuntu 20 LTS x86
 - Can be installed and used easily using pip and conda (See "Installation")
 - Automated tests are lacking
-
-Since I am a single maintener on this and it was developped for a specific usage on a specific machine, corrections might be required to get it work it on other configurations (e.g Apple computer).
 
 See "known problems" and "In case of installation problems" for more details
 
@@ -151,7 +149,7 @@ Older commit, however, might help you to find suitable settings that used to wor
 
 # Specific crashes and other known problems
 
-SMSN is a prototype and still has some issues.
+SMSN is a prototype and still has some issues. 
 
 * **When SMSN crashes because there's not enough RAM on Linux, don't expect to have an informative log. It will just crash**
 
