@@ -117,7 +117,8 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-Suggestions in case of problems (too long, dependency broken):
+SInce the first release, I was forced to delete my dependencies on conda-forge because it had became prohibitively slow to install smsn.
+In case of future problems (installation is too long, solving environment is taking forever, dependencies are broken):
 
 1. Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
 2. Delete conda-forge and conda-metachannel from your channels 
