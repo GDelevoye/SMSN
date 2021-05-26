@@ -25,7 +25,7 @@ See "known problems" and "In case of installation problems" for more details
     - 2GB of RAM per processor allocated to the job 
     -  0.15Mb per hole analyzed 
     -  Each of these two conditions must be met, but don't need to be added
-    - CPU: x86, the more physical cores the better
+- CPU: x86, the more physical cores the better
 
 
 # CLI Usage
