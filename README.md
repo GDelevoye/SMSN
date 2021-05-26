@@ -4,27 +4,23 @@ Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rath
 
 # Status
 
-Pre-alpha / Prototype
+Prototype, for research purpose only
 
-- Seems to work correctly with SequelI data
-- Lots of tests are lacking
+- Ran fine on real world data (Sequel I data), Ubuntu 20 LTS x86
+-- Not tested in any other platform
+- Can be installed and used easily using pip and conda (See "Installation")
+- Automated tests are lacking
+
+Since I am a single maintener on this and it was developped for a specific usage on a specific machine, corrections might be required to get it work it on other configurations (e.g Apple computer)
+
+Minor bugs might also occur in specific situations. See "known problems" and "In case of installation problems" for more details
 
 # Software Requirements
 
 - Linux LTS 20 or later (Other might work but are not tested) - x86-64 bits
-- conda 4.7.10 or later
+- conda 4.10
 
-# Usage
-
-Only two files are required: 
-
-* A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed)
-* A .fasta reference of your genome of interest. 
-
-
-~~The PacBio tools parse automatically the headers to use the right in-sillico models.~~
-
-**You need to indicate the in-sillico model in parameters. See the dedicated section to known which one you should use**. Available models are SP2-C2, CP3-C3, P6-C4. Only SP2-C2 has been tested for now.
+# CLI Usage
 
  ```console
 (smsn) guillaume@A320MA:~$ smsn --help
@@ -87,6 +83,17 @@ optional arguments:
                         / debug only)
   --idQvs IDQVS         Outputs PacBio's identificationQV [DEFAULT: TRUE]
 ```
+
+
+Only two inputs are required: 
+
+* A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed)
+* A .fasta reference of your genome of interest. 
+
+
+~~The PacBio tools parse automatically the headers to use the right in-sillico models.~~
+
+**You need to indicate the in-sillico model in parameters. See the dedicated section to known which one you should use**. Available models are SP2-C2, CP3-C3, P6-C4. Only SP2-C2 has been tested for now.
 
 
 #  <a name="whichmodel"></a> Which model should I use ?
