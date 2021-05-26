@@ -117,7 +117,13 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-**Known issue**: Conda takes LOTS of time to build everything. This is due to the conda solver, and shoudl be solved with the release of conda 5.0. However, even if it's slow, it works well after ~ 1 hour of installation on test machines. See  https://github.com/conda/conda/issues/7239 for more info . Building the environment with **mamba** instead of conda ( https://github.com/mamba-org/mamba ) might help if installing is really too slow.
+Suggestions in case of problems (too long, dependency broken):
+
+1. Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
+2. Delete conda-forge and conda-metachannel from your channels 
+3. Use a strict channel priority using  *conda config --set channel_priority false*
+4. Update conda through *conda update -n base conda* (Tested with conda 4.10.1)
+
 
 
 # Hardware requirements and calculation time
