@@ -167,10 +167,7 @@ SMSN is a prototype and still has some issues.
 
     * This should have been fixed, but I didn't test it.
 
-    * In case the bug is still there, two solutions:
-
-        * 1. Provide consensus built with CCS 3.0.0 manually **or** 
-        * 2. Specify the model manually with the --model argument (see next section to pick which)
+    * In case the bug is still there, provide consensus built with the PacBio's CCS tool version 3.0.0, manually, using the --CCS argument
     
 * **Bugs can occur when the coverage is really low for all HoleID**
 
