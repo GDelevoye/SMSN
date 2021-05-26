@@ -85,15 +85,10 @@ optional arguments:
 ```
 
 
-Only two inputs are required: 
-
-* A .bam with your PacBio Sequel I or II subreads (where adapter sequences have been removed)
-* A .fasta reference of your genome of interest. 
+**You need to indicate the in-sillico model you'd like to usein parameters. See the dedicated section to known which one you should use**. 
 
 
-~~The PacBio tools parse automatically the headers to use the right in-sillico models.~~
-
-**You need to indicate the in-sillico model in parameters. See the dedicated section to known which one you should use**. Available models are SP2-C2, CP3-C3, P6-C4. Only SP2-C2 has been tested for now.
+Only SP2-C2 has been tested for now.
 
 
 #  <a name="whichmodel"></a> Which model should I use ?
