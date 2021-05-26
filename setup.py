@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='smsn',
-    version='v0.2-alpha',
+    version='v1.0.1',
     author='DELEVOYE Guillaume',
     license=open('LICENSE.txt').read(),
     packages=find_packages("."),
