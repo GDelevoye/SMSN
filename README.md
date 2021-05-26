@@ -119,27 +119,19 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-## Details
-
-Because the program relies on ***very precise*** versions of PacBio's tools:
-
-- python 3.7 **MUST** be used
-- The requirements listed in environment.yml must be respected carefully
-- The only easy way of not getting wrong is by using a virtual environment manager - e.g conda. 
-- **DO NOT** try to install smsn in an already existing environment
--- It would very probably fail. 
--- Create a new environment instead, like it is done in the installation command lines above
 
 ## In case of installation problems 
 
 SInce the first release, I was forced to delete my dependencies on conda-forge because it had became prohibitively slow to install smsn.
 In case of future problems (installation is too long, solving environment is taking forever, dependencies are broken):
 
-1. Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
-2. Delete conda-forge and conda-metachannel from your channels 
-3. Use a strict channel priority using  *conda config --set channel_priority false*
-4. Update conda through *conda update -n base conda* (Tested with conda 4.10.1)
-5. In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others
+1. The requirements listed in environment.yml must be respected carefully (the more important being **python 3.7**)
+2. Don't install smsn in an already existing environment
+3. Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
+4. Delete conda-forge and conda-metachannel from your channels 
+5. Use a strict channel priority using  *conda config --set channel_priority false*
+6. Update conda through *conda update -n base conda* (Tested with *conda 4.10.1*)
+7. In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others
 
 Major environment changes were done for 1.0.1
 Older commit, however, might help you to find suitable settings that used to work with conda-forge.
