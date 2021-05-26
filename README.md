@@ -121,7 +121,7 @@ pip install -e ./SMSN/
 
 Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda. **DO NOT** try to install smsn in an already existing environment, it would very probably fail. Use the above command lines instead
 
-## In case of problems 
+## In case of installation problems 
 
 SInce the first release, I was forced to delete my dependencies on conda-forge because it had became prohibitively slow to install smsn.
 In case of future problems (installation is too long, solving environment is taking forever, dependencies are broken):
@@ -132,7 +132,8 @@ In case of future problems (installation is too long, solving environment is tak
 4. Update conda through *conda update -n base conda* (Tested with conda 4.10.1)
 5. In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others
 
-
+Major environment changes were done for 1.0.1
+Older commit, however, might help you to find suitable settings that used to work with conda-forge.
 
 # Hardware requirements and calculation time
 
