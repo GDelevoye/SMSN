@@ -20,6 +20,13 @@ See "known problems" and "In case of installation problems" for more details
 - Linux LTS 20 or later (Other might work but are not tested) - x86-64 bits
 - conda 4.10
 
+# Hardware requirements 
+
+- Up to several GB per run. 
+- Min 2GB RAM per processor allocated to the job and 0.13Mb per hole analyzed 
+-- Each of these two conditions must be met, but don't need to be added
+
+
 # CLI Usage
 
  ```console
@@ -137,15 +144,6 @@ In case of future problems (installation is too long, solving environment is tak
 
 Major environment changes were done for 1.0.1
 Older commit, however, might help you to find suitable settings that used to work with conda-forge.
-
-# Hardware requirements and calculation time
-
-- SSD is adviced
-- 1 recent CPU handles a hole in about ~5 to 10s on average (order of magnitude)
-- The size of the files generated varies a lot, but can easily reach several GB per run. 
-- min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
--- Each of these two conditions must be met, but don't need to be added
-
 
 
 # Known problems
