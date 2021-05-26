@@ -144,12 +144,13 @@ Older commit, however, might help you to find suitable settings that used to wor
 - min 2GB RAM per processor allocated to the job and 0.13Mb per hole 
 -- Each of these two conditions must be met, but don't need to be added
 
-**WARNING: When SMSN crashes because there's not enough RAM on Linux, don't expect to have an informative log. It will just crash**
 
 
 # Known problems
 
 SMSN is a prototype and still has some issues.
+
+* **When SMSN crashes because there's not enough RAM on Linux, don't expect to have an informative log. It will just crash**
 
 * **Multiprocessing deadlocks can occur, especially if --min_subreads < 50 or --min_identity is too low**
 
@@ -169,13 +170,13 @@ SMSN is a prototype and still has some issues.
 
         * The warnings and errors are not implemented correctly
     
-* Bugs can occur when the coverage is really low for all HoleID
+* **Bugs can occur when the coverage is really low for all HoleID**
 
-* Installation with conda is super-slow (see the dedicated section). 
+* **Installation with conda can be slow**, especially if you're using conda-forge or conda-metachannel (see the dedicated section to fix it). 
 
-* Only a very tiny proportion of the code is properly tested for now (prototype)
+* **Only a very tiny proportion of the code is properly tested for now (prototype)**
 
-* Some DEBUG/INFO lines might be a bit wrong / imprecise yet
+* **Some DEBUG/INFO lines might be a bit wrong / imprecise**
 
 
 # References
