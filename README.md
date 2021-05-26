@@ -123,6 +123,7 @@ Suggestions in case of problems (too long, dependency broken):
 2. Delete conda-forge and conda-metachannel from your channels 
 3. Use a strict channel priority using  *conda config --set channel_priority false*
 4. Update conda through *conda update -n base conda* (Tested with conda 4.10.1)
+5. In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others
 
 
 
