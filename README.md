@@ -149,7 +149,7 @@ Major environment changes were done for 1.0.1
 Older commit, however, might help you to find suitable settings that used to work with conda-forge.
 
 
-# Crashes and other known problems
+# Specific crashes and other known problems
 
 SMSN is a prototype and still has some issues.
 
