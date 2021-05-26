@@ -84,8 +84,11 @@ optional arguments:
   --idQvs IDQVS         Outputs PacBio's identificationQV [DEFAULT: TRUE]
 ```
 
+**Mandatory inputs**:
 
-**You need to indicate the in-sillico model you'd like to usein parameters. See the dedicated section to known which one you should use**. 
+1. A .bam file with the pacbio subreads
+2. A .fasta file of your reference genome
+3. A model name for the in-sillico control (See next section)
 
 
 Only SP2-C2 has been tested for now.
