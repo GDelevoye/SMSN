@@ -2,7 +2,7 @@
 
 Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rather than whole-genome amplification, and applied to Sequel I and II data. The SMSN scores are not computed exactly like the ones of Beaulaurier yet - for now it still outputs PacBio's scores.
 
-# Status
+# Development status
 
 Prototype, for research purpose only
 
@@ -11,9 +11,9 @@ Prototype, for research purpose only
 - Can be installed and used easily using pip and conda (See "Installation")
 - Automated tests are lacking
 
-Since I am a single maintener on this and it was developped for a specific usage on a specific machine, corrections might be required to get it work it on other configurations (e.g Apple computer)
+Since I am a single maintener on this and it was developped for a specific usage on a specific machine, corrections might be required to get it work it on other configurations (e.g Apple computer).
 
-Minor bugs might also occur in specific situations. See "known problems" and "In case of installation problems" for more details
+See "known problems" and "In case of installation problems" for more details
 
 # Software Requirements
 
