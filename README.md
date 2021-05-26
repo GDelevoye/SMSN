@@ -163,15 +163,15 @@ SMSN is a prototype and still has some issues.
 
     * **To avoid it, I recommand that you don't use --min_subreads < 50 nor --min_identity < 0.99**
  
-* **When put in "auto" mode and CCS are not provided by user (default behaviour), SMSN crashes because ipdSummary doesn't recognize the chemistry**
+* **When put in "auto" mode and CCS are not provided by user (default behaviour), SMSN used to crash because ipdSummary doesn't recognize the chemistry**
 
-    * Two solutions:
+    * This should have been fixed, but I didn't test it.
+
+    * In case the bug is still there, two solutions:
 
         * Provide consensus built with CCS 3.0.0 manually **or** 
         
         * Specify the model manually with the --model argument (see next section to pick which)
-
-        * The warnings and errors are not implemented correctly
     
 * **Bugs can occur when the coverage is really low for all HoleID**
 
