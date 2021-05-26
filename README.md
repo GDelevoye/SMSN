@@ -22,9 +22,12 @@ See "known problems" and "In case of installation problems" for more details
 
 # Hardware requirements 
 
-- Up to several GB per run. 
-- Min 2GB RAM per processor allocated to the job and 0.13Mb per hole analyzed 
+- HDD: A few gigabytes
+- RAM: 
+-- 2GB of RAM per processor allocated to the job 
+-- 0.15Mb per hole analyzed 
 -- Each of these two conditions must be met, but don't need to be added
+- CPU: x86, the more physical cores the better
 
 
 # CLI Usage
