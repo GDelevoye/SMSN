@@ -169,9 +169,8 @@ SMSN is a prototype and still has some issues.
 
     * In case the bug is still there, two solutions:
 
-        * Provide consensus built with CCS 3.0.0 manually **or** 
-        
-        * Specify the model manually with the --model argument (see next section to pick which)
+        * 1. Provide consensus built with CCS 3.0.0 manually **or** 
+        * 2. Specify the model manually with the --model argument (see next section to pick which)
     
 * **Bugs can occur when the coverage is really low for all HoleID**
 
