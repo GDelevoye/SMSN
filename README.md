@@ -126,7 +126,14 @@ pip install -e ./SMSN/
 
 ## Details
 
-Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda. **DO NOT** try to install smsn in an already existing environment, it would very probably fail. Use the above command lines instead
+Because the program relies on ***very precise*** versions of PacBio's tools:
+
+- python 3.7 **MUST** be used
+- The requirements listed in environment.yml must be respected carefully
+- The only easy way of not getting wrong is by using a virtual environment manager - e.g conda. 
+- **DO NOT** try to install smsn in an already existing environment
+-- It would very probably fail. 
+-- Create a new environment instead, like it is done in the installation command lines above
 
 ## In case of installation problems 
 
