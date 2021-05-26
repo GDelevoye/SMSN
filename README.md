@@ -91,9 +91,6 @@ optional arguments:
 3. A model name for the in-sillico control (See next section)
 
 
-Only SP2-C2 has been tested for now.
-
-
 #  <a name="whichmodel"></a> Which model should I use ?
 
 As described in the section above, **the --model argument is actually required** in the default configuration. You have to indicate yours
@@ -107,6 +104,8 @@ Available models are:
 **SP2-C2** is recommended for **Sequel I** chemistries
 **SP3-C3** is recommanded for **Sequel IIv2** chemistries
 **Most RSII user would probably want to use P5-C3 model, which is not supported yet**
+
+Only SP2-C2 (Sequel I) has been tested yet, but the others should work too.
 
 > See [here](https://github.com/PacificBiosciences/kineticsTools/pull/71) for more info.
 
