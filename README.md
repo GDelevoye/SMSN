@@ -108,7 +108,7 @@ Available models are:
 
 # Installation 
 
-Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda.
+## TL; DR
 
 ```console
 git clone https://github.com/GDelevoye/SMSN.git
@@ -116,6 +116,12 @@ conda env create -n smsn -f ./SMSN/environment.yml
 conda activate smsn
 pip install -e ./SMSN/
 ```
+
+## Details
+
+Because the program relies on ***very precise*** versions of PacBio's tools, python 3.7 **MUST** be used and all the requirements listed in environment.yml ***must*** be respected carefully. The only easy way of not getting wrong is by using a virtual environment manager - e.g conda. **DO NOT** try to install smsn in an already existing environment, it would very probably fail. Use the above command lines instead
+
+## In case of problems 
 
 SInce the first release, I was forced to delete my dependencies on conda-forge because it had became prohibitively slow to install smsn.
 In case of future problems (installation is too long, solving environment is taking forever, dependencies are broken):
