@@ -16,7 +16,6 @@ from smsn.pipeline import call_process
 
 
 def launch_ipdSummary(aligned_subreads, reference, holeID, args):
-    """Returns a list of dicts corresponding to the hacked output of ipdSummary"""
     logging.debug('[DEBUG] (launch_ipdSummary) recieved aligned_subreads = {} and reference = {} and holeID = {}'.format(aligned_subreads,reference,holeID))
 
     workdir = os.path.dirname(aligned_subreads)
