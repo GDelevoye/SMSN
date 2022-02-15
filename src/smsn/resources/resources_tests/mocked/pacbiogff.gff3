@@ -1,0 +1,4 @@
+##gff-version 3.1.26
+##sequence-region ctg123 1 1497228
+scaffold_001 . 6mA            1000  9000  .  +  .  identificationQv=20;modQV=30;context=AAACCAACTCCTGCGCTGTCGGAGA
+scaffold_001 . 4mC 1000  1012  .  -  .  identificationQv=22;modQV=34;context='TCTCCGACAGCGCAGGAGTTGGTTT'

@@ -1,0 +1,27 @@
+channels:
+  - defaults
+  - bioconda
+dependencies:
+  - python >=3.7,<3.8
+  - bedtools==2.30.0
+  - pbcore=2.1.2
+  - pbcoretools=0.8.1
+  - pbbam=1.3.0
+  - pbcommand=2.1.1
+  - blasr=5.3
+  - samtools=1.9
+  - pbccs=3.1
+  - pybigwig
+  - pandas=1.2.3
+  - psutil=5.8.0
+  - pytest
+  - pip=21.0.1
+  - setuptools
+  - wheel
+  - pip:
+    - git+https://github.com/PacificBiosciences/kineticsTools.git@665546178ea9284ce7718f204ad2364afbe26514
+    - git+https://github.com/nalepae/pandarallel.git@c47005568654dd48bd5da85047242e5ad25fc0f7
+    - git+https://github.com/tqdm/tqdm.git@bcce20f771a16cb8e4ac5cc5b2307374a2c0e535
+    - autopep8
+    - coverage
+    - testfixtures

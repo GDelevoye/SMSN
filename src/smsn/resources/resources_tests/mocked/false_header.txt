@@ -1,0 +1,5 @@
+@HD	VN:1.5	SO:unknown	pb:3.0.3
+@RG	ID:3c2d9223	PL:PACBIO	DS:READTYPE=SUBREAD;Ipd:CodecV1=ip;PulseWidth:CodecV1=pw;BINDINGKIT=100-862-200;SEQUENCINGKIT=101-093-700;BASECALLERVERSION=5.0.0.6236;FRAMERATEHZ=80.000000	PU:m54063_170928_100556	PM:SEQUEL
+@PG	ID:baz2bam	PN:baz2bam	VN:5.0.0.6236	CL:/opt/pacbio/ppa-5.0.0/bin/baz2bam /data/pb/m54063_170928_100556.baz -o /data/pb/m54063_170928_100556 --metadata /data/pb/.m54063_170928_100556.metadata.xml -j 12 -b 12 --progress --silent --minSubLength 50 --minSnr 3.750000 --adapters /data/pb/m54063_170928_100556.adapters.fasta --controlAdapters /data/pb/m54063_170928_100556.controls.adapters.fasta --controls /data/pb/m54063_170928_100556.controls.fasta
+@PG	ID:bazFormat	PN:bazformat	VN:1.3.0
+@PG	ID:bazwriter	PN:bazwriter	VN:5.0.0.6236
