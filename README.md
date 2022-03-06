@@ -2,7 +2,16 @@
 
 # SMSN
 
-Adapted version of Beaularier's SMSN (See [1]), but with in-sillico control rather than whole-genome amplification, and applied to Sequel I and II data. The SMSN scores are not computed exactly like the ones of Beaulaurier yet - for now it still outputs PacBio's scores.
+Adapted version of Beaularier's SMSN
+
+See the reference [1] and [this Github repo](https://github.com/fanglab/SMALR). The differences are the following :
+
+* Here, we use the PacBio in-sillico control rather than a whole-genome amplified DNA.
+* We applied our pipeline to Sequel I, rather than RS II
+* The pipeline might work (but was not tested) on Sequel II data too.
+* The SMSN scores are not computed exactly like the ones of Beaulaurier et al.
+
+Our [companion article](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/SMSN_Article_preprint_v01.pdf) explains how the scores are computed and how they can be interpreted
 
 # Pre-print
 
