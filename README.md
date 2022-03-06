@@ -17,20 +17,6 @@ Our [companion article](https://github.com/GDelevoye/SMSN/blob/main/article/prep
 
 A preprint describing the software's architecture, goals and results in _E. coli_ is available [here](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/SMSN_Article_preprint_v01.pdf). Please read [the disclaimer](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/DISCLAIMER.md) as well.
 
-# Development status 🛠️
-
-Prototype, for research purpose only (see License). 
-
-Here are the possible additional developments :
-
-- More documentation
-- conda package release
-- Automated CI
-- MacOS/Windows support
-- Proper Benchmark (RAM and CPU)
-- More test cases to enhance reliability
-- CHeck that it works also for Older (RS II) or newer (Sequel II.v2) data
-
 
 # Software Requirements
 
@@ -54,29 +40,6 @@ pip install -e ./SMSN/
 
 * Installation can sometimes be slow due to conda-forge. See  [the detailed explanations](#in-case-of-installation-problems) for more info.
 
-## Tests 
-
-There are two ways to run the test : 1) Either you want to test the repository or 2) You want to test your pip installation's correctness. 
-
-### Test your local copy of the repository
-
-```console 
-pytest . # Docstrings should be tested too because of the pytest.ini file at the root
-```
-
-To run the same tests with a coverage analysis :
-
-```console
-coverage run -m pytest . -vv && coverage report && coverage html
-```
-
-### Test the pip installation
-
-Testing files are not shipped with the pip installation. You can however test your pip-installation from the repository. If you have made a non-editable pip installation, testing your pip installation can be done running : 
-
-```console
-coverage run -m pytest tests/ --doctest-modules --pyargs smsn -vvv && coverage report && coverage html
-```
 
 # CLI Usage
 
@@ -159,6 +122,46 @@ optional arguments:
   --idQvs IDQVS         Outputs PacBio's identificationQV [DEFAULT: True,
                         choices = True or False]
 
+```
+
+# Development
+
+## Development status 🛠️
+
+Prototype, for research purpose only (see License). 
+
+Here are the possible additional developments :
+
+- More documentation
+- conda package release
+- MacOS/Windows support
+- Proper Benchmark (RAM and CPU)
+- More test cases to enhance reliability
+- CHeck that it works also for Older (RS II) or newer (Sequel II.v2) data
+
+
+## Tests 
+
+There are two ways to run the test : 1) Either you want to test the repository or 2) You want to test your pip installation's correctness. 
+
+### Test your local copy of the repository
+
+```console 
+pytest . # Docstrings should be tested too because of the pytest.ini file at the root
+```
+
+To run the same tests with a coverage analysis :
+
+```console
+coverage run -m pytest . -vv && coverage report && coverage html
+```
+
+### Test the pip installation
+
+Testing files are not shipped with the pip installation. You can however test your pip-installation from the repository. If you have made a non-editable pip installation, testing your pip installation can be done running : 
+
+```console
+coverage run -m pytest tests/ --doctest-modules --pyargs smsn -vvv && coverage report && coverage html
 ```
 
 # FAQ 
