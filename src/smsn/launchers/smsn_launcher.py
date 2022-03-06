@@ -250,13 +250,10 @@ def str2bool(v):
 
 def parseargs(args):
 
-    description = """This software implements the SMSN approach of PacBio sequencing in the same way as Beaulaurier
-    et al 2015, but contrary to Beaulaurier's software, this one can be used even in the absence of a PCR-amplified
-    control, and on more recent data (tested on Sequel I).
-
-    DELEVOYE Guillaume 2020.
-    thttps://github.com/EMeyerLab/SMSN
-    """
+    description = 'This software implements the SMSN approach of PacBio sequencing in similar way as' \
+                  ' Beaulaurier et al 2015, except that it relies on PacBio ipdSummary and can be used ' \
+                  'even in the absence of a PCR-amplified control.\n\n Tested on Sequel I data only.' \
+                  'DELEVOYE Guillaume 2020. \n https://github.com/EMeyerLab/SMSN'
 
     parser = argparse.ArgumentParser(description=description,
                                      formatter_class=RawFormatter)
