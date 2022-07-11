@@ -8,7 +8,7 @@ See the reference [1] and [this Github repo](https://github.com/fanglab/SMALR). 
 
 * Here, we use the PacBio in-sillico control rather than a whole-genome amplified DNA.
 * We applied our pipeline to Sequel I, rather than RS II
-* The pipeline might work (but was not tested) on Sequel II data too.
+* Not tested on Sequel II data but should work too.
 * The SMSN scores are not computed exactly like the ones of Beaulaurier et al.
 
 Our [companion article](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/SMSN_Article_preprint_v01.pdf) explains how the scores are computed and how they can be interpreted
@@ -21,13 +21,12 @@ A preprint describing the software's architecture, goals and results in _E. coli
 # Software Requirements
 
 - Linux LTS 20 or later (Other might work but are not tested) - x86-64 bits
-- conda 4.10.3
+- conda >= 4.10.3
 
 # Installation (TL;DR)
 
+
 ```console
-# Execute the following script line by line in a terminal rather than in a script.
-# Conda activate might not work correctly otherwise.
 git clone https://github.com/GDelevoye/SMSN.git
 conda activate
 conda create -n smsn
@@ -36,10 +35,20 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-## Note
+## In case of installation problems 
 
-* Installation can sometimes be slow due to conda-forge. See  [the detailed explanations](#in-case-of-installation-problems) for more info.
+ * :warning: Execute the script line by line in a terminal rather than in a script. :warning:
+ 
+ > Especially true for conda activate
 
+ * Installation can sometimes be slow due to conda-forge. See  [the detailed explanations](#in-case-of-installation-problems) for more info. Workardounds :
+
+1. Don't install smsn in an already existing environment !
+2. Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
+3. Delete conda-forge and conda-metachannel from your channels 
+4. Use a strict channel priority using  *conda config --set channel_priority false*
+5. Update conda through *conda update -n base conda* (Tested with *conda 4.10.1*)
+6. In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others
 
 # CLI Usage
 
@@ -132,12 +141,11 @@ Prototype, for research purpose only (see License).
 
 Here are the possible additional developments :
 
-- More documentation
+- Better documentation (in-silico control ++)
 - conda package release
-- MacOS/Windows support
-- Proper Benchmark (RAM and CPU)
-- More test cases to enhance reliability
-- CHeck that it works also for Older (RS II) or newer (Sequel II.v2) data
+- MacOS/Windows support (?)
+- More test cases 
+- Check that it works also for Older (RS II) or newer (Sequel II.v2) data
 
 
 ## Tests 
@@ -185,18 +193,6 @@ Available models are:
 Only SP2-C2 (Sequel I) has been tested yet, but the others should work too.
 
 > See [here](https://github.com/PacificBiosciences/kineticsTools/pull/71) for more info.
-
-
-## In case of installation problems 
-
-In case problems (installation is too long, solving environment is taking forever, dependencies are broken):
-
-1. Don't install smsn in an already existing environment !
-2. Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
-3. Delete conda-forge and conda-metachannel from your channels 
-4. Use a strict channel priority using  *conda config --set channel_priority false*
-5. Update conda through *conda update -n base conda* (Tested with *conda 4.10.1*)
-6. In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others
 
 # References
 
