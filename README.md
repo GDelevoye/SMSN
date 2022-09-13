@@ -37,18 +37,14 @@ pip install -e ./SMSN/
 
 ## In case of installation problems 
 
- * :warning: Execute the script line by line in a terminal rather than in a script. :warning:
- 
- > Especially true for conda activate
-
+ * Execute the installation script line by line in a terminal rather than running it in a text file.
  * Installation can sometimes be slow due to conda-forge. See  [the detailed explanations](#in-case-of-installation-problems) for more info. Workardounds :
-
-1. Don't install smsn in an already existing environment !
-2. Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
-3. Delete conda-forge and conda-metachannel from your channels 
-4. Use a strict channel priority using  *conda config --set channel_priority false*
-5. Update conda through *conda update -n base conda* (Tested with *conda 4.10.1*)
-6. In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others
+ * Don't install smsn in an already existing environment !
+ * Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
+ * Delete conda-forge and conda-metachannel from your channels if conda is too slow
+ * Use a strict channel priority using  *conda config --set channel_priority false* if conda is too slow
+ * Update conda through *conda update -n base conda* (Tested with *conda 4.10.1*)
+ * In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others if conda is too slow
 
 # CLI Usage
 
