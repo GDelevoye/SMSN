@@ -15,7 +15,7 @@ Our [companion article](https://github.com/GDelevoye/SMSN/blob/main/article/prep
 
 # Pre-print
 
-A preprint describing the software's architecture, goals and results in _E. coli_ is available [here](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/SMSN_Article_preprint_v01.pdf). Please read [the disclaimer](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/DISCLAIMER.md) as well.
+A preprint describing the software's architecture, goals and results in _E. coli_ is available [here](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/SMSN_Article_v2.pdf). Please read [the disclaimer](https://github.com/GDelevoye/SMSN/blob/main/article/preprint/DISCLAIMER.md) as well.
 
 
 # Software Requirements
