@@ -131,18 +131,15 @@ optional arguments:
 
 # Development
 
-## Development status 🛠️
+## Roadmap 🛠️
 
 Prototype, for research purpose only (see License). 
 
 Here are the possible additional developments :
 
-- Better documentation (in-silico control ++)
-- conda package release
-- MacOS/Windows support (?)
-- More test cases 
-- Check that it works also for Older (RS II) or newer (Sequel II.v2) data
-
+- Better documentation about the different in-silico controls
+- conda package release 
+- Check the pipeline with Older (RS II) or newer (Sequel II.v2) data
 
 ## Tests 
 
