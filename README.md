@@ -1,7 +1,9 @@
 [![CircleCI](https://circleci.com/gh/EMeyerLab/SMSN/tree/clean_article.svg?style=shield&circle-token=bfc806f868edcd05f6f15e1041c290ea11f24531)](https://app.circleci.com/pipelines/github/EMeyerLab/SMSN)
 
 ```diff
-! I am currently looking for SMSN data sequenced with the Sequel II sequencer in order to test my pipeline. If you appear to be interested in using this software with Sequel II data, I can help you with the analysis if you have that kind of data. 
+! I am currently looking for SMSN data sequenced with the Sequel II sequencer in order to test my pipeline. 
+! If you appear to be interested in using this software with Sequel II data, 
+! I can help you with the analysis if you have that kind of data. 
 ```
 
 # SMSN
