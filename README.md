@@ -35,17 +35,6 @@ conda activate smsn
 pip install -e ./SMSN/
 ```
 
-## In case of installation problems 
-
- * Execute the installation script line by line in a terminal rather than running it in a text file.
- * Installation can sometimes be slow due to conda-forge. See  [the detailed explanations](#in-case-of-installation-problems) for more info. Workardounds :
- * Don't install smsn in an already existing environment !
- * Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
- * Delete conda-forge and conda-metachannel from your channels if conda is too slow
- * Use a strict channel priority using  *conda config --set channel_priority false* if conda is too slow
- * Update conda through *conda update -n base conda* (Tested with *conda 4.10.1*)
- * In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others if conda is too slow
-
 # CLI Usage
 
 
@@ -186,6 +175,19 @@ Available models are:
 Only SP2-C2 (Sequel I) has been tested yet, but the others should work too.
 
 > See [here](https://github.com/PacificBiosciences/kineticsTools/pull/71) for more info.
+
+
+## In case of installation problems 
+
+ * Execute the installation script line by line in a terminal rather than running it in a text file.
+ * Installation can sometimes be slow due to conda-forge. See  [the detailed explanations](#in-case-of-installation-problems) for more info. Workardounds :
+ * Don't install smsn in an already existing environment !
+ * Use [mamba](https://github.com/mamba-org/mamba) if conda is really slow. See  https://github.com/conda/conda/issues/7239 for more info .
+ * Delete conda-forge and conda-metachannel from your channels if conda is too slow
+ * Use a strict channel priority using  *conda config --set channel_priority false* if conda is too slow
+ * Update conda through *conda update -n base conda* (Tested with *conda 4.10.1*)
+ * In your conda configuration, set the "defaults" conda channel at highest priority, followed by the "bioconda" channel, and remove all the others if conda is too slow
+
 
 # References
 
